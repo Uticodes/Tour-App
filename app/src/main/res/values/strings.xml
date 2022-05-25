@@ -1,3 +1,42 @@
 <resources>
     <string name="app_name">TourGuideApp</string>
+    <string name="empty_tour">No Tours added yet, \nClick on the + button to add a tour</string>
+    <string name="location">Location</string>
+    <string name="view_on_google_maps">View on Google Maps</string>
+    <string name="date">Date</string>
+    <string name="tour_date">12 Jan, 2021 – 24 Jan, 2021</string>
+    <string name="country_name1">Maldives</string>
+    <string name="place_name1">Paradise Island Resort</string>
+    <string name="country_name2">Cotonou</string>
+    <string name="place_name2">Bab\'s Dock</string>
+    <string name="country_name3">Cotonou</string>
+    <string name="place_name3">La Casa del Papa</string>
+    <string name="country_name4">Kenya</string>
+    <string name="place_name4">Maasai Mara Game Reserve</string>
+    <string name="country_name5">Qatar</string>
+    <string name="place_name5">National Museum</string>
+    <string name="tour_description">Very unique, high technology, nice sound effect, animals inside look like real. You can have overview about the history of Qatar, way of living tradition … It is better to guide the visitors by putting signs or by having one path to make sure that we will not miss anything.</string>
+    <string name="title_activity_tour_details">TourDetailsActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="tours_fragment_label">Tours</string>
+    <string name="tour_details_fragment">Tour Details</string>
+    <string name="add_tour_fragment_label">Add a Tour</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="login">Log In</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="country_name">Enter Country Name</string>
+    <string name="save">Save</string>
+    <string name="upload_place_image">Upload Place Image</string>
+    <string name="enter_place_description">Enter Place Description</string>
+    <string name="enter_place_name">Enter Place Name</string>
+
 </resources>

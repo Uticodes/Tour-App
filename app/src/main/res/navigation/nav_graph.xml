@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/ToursFragment">
+
+    <fragment
+        android:id="@+id/ToursFragment"
+        android:name="eu.tutorials.tourguideapp.tour.TourFragment"
+        android:label="@string/tours_fragment_label"
+        tools:layout="@layout/fragment_tours">
+
+        <action
+            android:id="@+id/to_TourDetailsFragment"
+            app:destination="@id/TourDetailsFragment" />
+        <action
+            android:id="@+id/to_AddTourFragment"
+            app:destination="@id/AddTourFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/TourDetailsFragment"
+        android:name="eu.tutorials.tourguideapp.tour.TourDetailsFragment"
+        android:label="@string/tour_details_fragment"
+        tools:layout="@layout/fragment_tour_details">
+
+        <action
+            android:id="@+id/to_ToursFragment"
+            app:destination="@id/ToursFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/AddTourFragment"
+        android:name="eu.tutorials.tourguideapp.tour.AddTourFragment"
+        android:label="@string/add_tour_fragment_label"
+        tools:layout="@layout/fragment_add_tour" >
+
+        <action
+            android:id="@+id/to_toursFragment"
+            app:destination="@id/ToursFragment" />
+    </fragment>
+</navigation>
