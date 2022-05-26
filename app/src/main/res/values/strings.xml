@@ -29,13 +29,17 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="login">Log In</string>
+    <string name="signUp">SignUp</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="start_date">Select Start Date</string>
+    <string name="end_date">Select End Date</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="country_name">Enter Country Name</string>
     <string name="save">Save</string>
-    <string name="upload_place_image">Upload Place Image</string>
+    <string name="upload">Upload</string>
+    <string name="choose_image">Choose Image</string>
     <string name="enter_place_description">Enter Place Description</string>
     <string name="enter_place_name">Enter Place Name</string>
 

@@ -16,7 +16,7 @@
         app:titleTextColor="@color/black" />
 
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/emailEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
@@ -30,7 +30,7 @@
 
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/passwordEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
@@ -41,18 +41,39 @@
         android:inputType="textPassword"
         android:paddingBottom="20dp" />
 
-    <Button
-        android:id="@+id/loginBtn"
-        android:layout_height="50dp"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginRight="20dp"
-        android:background="@color/teal_700"
-        android:enabled="true"
-        android:textSize="20sp"
-        android:textColor="@color/white"
-        android:text="@string/login"
-        android:textAllCaps="false"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/loginBtn"
+            android:layout_height="60dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="20dp"
+            android:backgroundTint="@color/purple_500"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:text="@string/login"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/signUpBtn"
+            android:layout_height="60dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="20dp"
+            android:backgroundTint="@color/teal_700"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:text="@string/signUp"
+            android:textAllCaps="false"/>
+
+    </LinearLayout>
 
 </LinearLayout>

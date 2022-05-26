@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="40dp"
         android:layout_marginRight="20dp"
         android:drawablePadding="10dp"
         android:hint="@string/country_name"
@@ -38,6 +38,35 @@
         android:inputType="textPassword"
         android:paddingBottom="20dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="11dp"
+        android:layout_gravity="center_horizontal">
+
+        <EditText
+            android:id="@+id/startDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:hint="@string/start_date"
+            android:inputType="datetime">
+        </EditText>
+
+        <EditText
+            android:id="@+id/endDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:hint="@string/end_date"
+            android:inputType="datetime" />
+    </LinearLayout>
+
     <EditText
         android:id="@+id/placeDescription"
         android:layout_width="match_parent"
@@ -51,7 +80,7 @@
         android:paddingBottom="20dp" />
 
     <Button
-        android:id="@+id/uploadBtn"
+        android:id="@+id/chooseImageBtn"
         android:layout_height="55dp"
         android:layout_width="match_parent"
         android:layout_marginLeft="20dp"
@@ -61,7 +90,7 @@
         android:enabled="true"
         android:textSize="18sp"
         android:textColor="@color/white"
-        android:text="@string/upload_place_image"
+        android:text="@string/choose_image"
         android:textAllCaps="false"/>
 
     <ImageView
@@ -73,7 +102,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
-        android:id="@+id/saveBtn"
+        android:id="@+id/uploadBtn"
         android:layout_height="50dp"
         android:layout_width="match_parent"
         android:layout_marginLeft="20dp"
@@ -85,7 +114,7 @@
         android:textSize="20sp"
         android:layout_marginBottom="30dp"
         android:textColor="@color/white"
-        android:text="@string/save"
+        android:text="@string/upload"
         android:textAllCaps="false"/>
 
     </LinearLayout>

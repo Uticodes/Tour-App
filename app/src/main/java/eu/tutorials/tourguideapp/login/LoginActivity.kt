@@ -1,159 +1,91 @@
 package eu.tutorials.tourguideapp.login
 
+import android.R.attr.password
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.KeyEvent
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.google.firebase.auth.FirebaseAuth
 import eu.tutorials.tourguideapp.R
-import eu.tutorials.tourguideapp.tour.ToursActivity
 import eu.tutorials.tourguideapp.databinding.ActivityLoginBinding
+import eu.tutorials.tourguideapp.tour.ToursActivity
 
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private var binding: ActivityLoginBinding? = null
+    private var mAuth: FirebaseAuth? = null
+    private val TAG = LoginActivity::class.java.simpleName
+
+//    val t = userEmail.isNotEmpty() && userPassword.isNotEmpty()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
+        mAuth = FirebaseAuth.getInstance()
+
         setContentView(binding?.root)
         toolbar = binding!!.loginToolbar
         setSupportActionBar(toolbar)
         setupInputs()
     }
 
-    private fun setupInputs(){
+    private fun setupInputs() {
+
         binding?.apply {
 
-//            email.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.message, 0, 0, 0)
-//            password.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.password, 0, 0, 0)
+            //initialize views
+            var userEmail = binding?.emailEt?.text.toString().trim()
+            var userPassword = binding?.passwordEt?.text.toString().trim()
 
+            emailEt.addTextChangedListener(loginTextWatcher)
+            passwordEt.addTextChangedListener(loginTextWatcher)
 
-            email.addTextChangedListener(loginTextWatcher)
-            password.addTextChangedListener(loginTextWatcher)
-
-            binding?.loginBtn?.setOnClickListener {
-                onLoginButtonClick()
+            //Perform login
+            loginBtn.setOnClickListener {
+                loginUser()
+            }
+            //Perform signUp
+            signUpBtn.setOnClickListener {
+                signUpUser()
             }
 
-            email.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-                {
+            emailEt.apply {
+                setOnEditorActionListener {_, actionId, keyEvent ->
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                        keyEvent == null ||
+                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        userEmail = text.toString()
+                    }
+                    false
                 }
 
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-                {
+                setOnFocusChangeListener {view, gainedFoucs ->
+                    userEmail = text.toString()
+                }
+            }
 
+            passwordEt.apply {
+                setOnEditorActionListener {_, actionId, keyEvent ->
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                        keyEvent == null ||
+                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        userPassword = text.toString()
+                    }
+                    false
                 }
 
-                override fun afterTextChanged(s: Editable)
-                {
-//                    if (s.length != 0)
-//                    {
-//                        var drawable = resources.getDrawable(R.drawable.message) //Your drawable image
-//                        drawable = DrawableCompat.wrap(drawable!!)
-//                        DrawableCompat.setTint(drawable, resources.getColor(R.color.colordarkblue)) // Set whatever color you want
-//                        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                        email.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                        email.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.message),
-//                            null, resources.getDrawable(R.drawable.cancel), null)
-//                    }
-//                    else if (s.length == 0)
-//                    {
-//                        email.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.message,
-//                            0, 0, 0)
-//                        var drawable = resources.getDrawable(R.drawable.message) //Your drawable image
-//                        drawable = DrawableCompat.wrap(drawable!!)
-//                        DrawableCompat.setTint(drawable, resources.getColor(R.color.colorDefault)) // Set whatever color you want
-//                        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                        email.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                        email.setCompoundDrawablesWithIntrinsicBounds(
-//                            resources.getDrawable(R.drawable.message),
-//                            null, null, null
-//                        )
-//                    }
+                setOnFocusChangeListener {view, gainedFoucs ->
+                    userPassword = text.toString()
                 }
-            })
-
-            password.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-                {
-
-                }
-
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-                {
-
-                }
-
-                override fun afterTextChanged(s: Editable)
-                {
-//                    if (s.length != 0)
-//                    {
-//                        var drawable = resources.getDrawable(R.drawable.password) //Your drawable image
-//                        drawable = DrawableCompat.wrap(drawable!!)
-//                        DrawableCompat.setTint(drawable, resources.getColor(R.color.colordarkblue)) // Set whatever color you want
-//                        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                        password.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                        password.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.password),
-//                            null, resources.getDrawable(R.drawable.cancel), null)
-//                    }
-//                    else if (s.length == 0)
-//                    {
-//                        password.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.password,
-//                            0, 0, 0)
-//                        var drawable = resources.getDrawable(R.drawable.password) //Your drawable image
-//                        drawable = DrawableCompat.wrap(drawable!!)
-//                        DrawableCompat.setTint(drawable, resources.getColor(R.color.colorDefault)) // Set whatever color you want
-//                        DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                        password.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                        password.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.password),
-//                            null, null, null
-//                        )
-//                    }
-                }
-            })
-
-//            email.setOnTouchListener(View.OnTouchListener { v, event ->
-//
-//                if (event.action == MotionEvent.ACTION_DOWN)
-//                {
-//                    if (email.getCompoundDrawables().get(2) != null)
-//                    {
-//                        if (event.x >= email.getRight() - email.getLeft() -
-//                            email.getCompoundDrawables().get(2).getBounds().width())
-//                        {
-//                            if (email.getText().toString() != "")
-//                            {
-//                                email.setText("")
-//                            }
-//                        }
-//                    }
-//                }
-//                false
-//            })
-//
-//            password.setOnTouchListener(View.OnTouchListener { v, event ->
-//
-//                if (event.action == MotionEvent.ACTION_DOWN)
-//                {
-//                    if (password.getCompoundDrawables().get(2) != null)
-//                    {
-//                        if (event.x >= password.getRight() - password.getLeft() -
-//                            password.getCompoundDrawables().get(2).getBounds().width()
-//                        )
-//                        {
-//                            if (password.getText().toString() != "")
-//                            {
-//                                password.setText("")
-//                            }
-//                        }
-//                    }
-//                }
-//                false
-//            })
+            }
 
         }
 
@@ -162,268 +94,119 @@ class LoginActivity : AppCompatActivity() {
 
     private val loginTextWatcher: TextWatcher = object : TextWatcher {
 
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-        {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
 
         }
 
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-        {
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
 
         }
 
-        override fun afterTextChanged(s: Editable)
-        {
-            val mUsername: String = binding?.email?.text.toString().trim()
-            val mPassword: String = binding?.password?.text.toString().trim()
-            val t = !mUsername.isEmpty() && !mPassword.isEmpty()
-            if (t)
-            {
-                binding?.loginBtn?.setBackgroundResource(R.color.purple_700)
-            }
-            else
-            {
-                binding?.loginBtn?.setBackgroundResource(R.color.grey)
-            }
+        override fun afterTextChanged(s: Editable) {
+//            if (t) {
+//                binding?.apply {
+//                    loginBtn.isEnabled = true
+//                    signUpBtn.isEnabled = true
+//                }
+//            } else {
+//                binding?.apply {
+//                    loginBtn.isEnabled = false
+//                    signUpBtn.isEnabled = false
+//                }
+//            }
 
         }
     }
 
-    override fun onStart()
-    {
+    override fun onStart() {
         super.onStart()
-        val mUsername: String = binding?.email?.text.toString().trim()
-        val mPassword: String = binding?.password?.text.toString().trim()
-        val t = !mUsername.isEmpty() && !mPassword.isEmpty()
-        if (t)
-        {
-            binding?.loginBtn?.setBackgroundResource(R.color.purple_700)
+        //updateUI(currentUser);
+        mAuth?.currentUser?.let {
+            Intent(this@LoginActivity, ToursActivity::class.java).apply {
+                startActivity(this)
+            }
         }
-        else
-        {
-            binding?.loginBtn?.setBackgroundResource(R.color.grey)
-        }
+
+//        if (t) {
+//            binding?.apply {
+//                loginBtn.isEnabled = true
+//                signUpBtn.isEnabled = true
+//            }
+//
+//        } else {
+//            binding?.apply {
+//                loginBtn.isEnabled = false
+//                signUpBtn.isEnabled = false
+//            }
+//        }
     }
 
-    /* Opens TourDetailsActivity when RecyclerView item is clicked. */
-    private fun onLoginButtonClick() {
-        val intent = Intent(this, ToursActivity()::class.java)
-        //intent.putExtra(TOUR_ID, tour.id)
-        startActivity(intent)
+    private fun loginUser() {
+        val userEmail = binding?.emailEt?.text.toString().trim()
+        val userPassword = binding?.passwordEt?.text.toString().trim()
+        //Check if email and password is empty
+        if (userEmail.isEmpty() || userPassword.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Please make sure to fill in your email and password",
+                Toast.LENGTH_SHORT
+            ).show()
+
+        } else {
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, userPassword)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        //updateFirebaseUserDisplayName()
+                        Log.d(TAG, "signInUserWithEmail:success")
+                        val intent = Intent(this, ToursActivity()::class.java)
+                        //intent.putExtra(TOUR_ID, tour.id)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "An error has occurred during login. ${task.exception}, Please try again later.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.w(TAG, "signInUserWithEmail:failure", task.exception)
+                    }
+                }
+        }
+
+
+    }
+
+    private fun signUpUser() {
+        val userEmail = binding?.emailEt?.text.toString().trim()
+        val userPassword = binding?.passwordEt?.text.toString().trim()
+
+        if (userEmail.isEmpty() || userPassword.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Please make sure to fill in your email and password",
+                Toast.LENGTH_SHORT
+            ).show()
+
+        } else {
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail, userPassword)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        //updateFirebaseUserDisplayName()
+                        Log.d(TAG, "createUserWithEmail:success")
+                        val intent = Intent(this, ToursActivity()::class.java)
+                        //intent.putExtra(TOUR_ID, tour.id)
+                        startActivity(intent)
+                    } else {
+                        Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                        Toast.makeText(
+                            this,
+                            "An error has occurred during signup. ${task.exception}, Please try again later.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+        }
     }
 
 }
-
-//
-//package com.example.loginapp
-//
-//import android.graphics.PorterDuff
-//import androidx.appcompat.app.AppCompatActivity
-//import android.os.Bundle
-//import android.text.Editable
-//import android.text.TextWatcher
-//import android.view.MotionEvent
-//import android.view.View
-//import androidx.appcompat.widget.Toolbar
-//import androidx.core.graphics.drawable.DrawableCompat
-//import kotlinx.android.synthetic.main.activity_main.*
-
-//class MainActivity : AppCompatActivity() {
-//
-//
-//    private lateinit var toolbar: Toolbar
-//
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
-//
-//
-//        toolbar = findViewById(R.id.toolbar_login)
-//        setSupportActionBar(toolbar)
-//
-//        email.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.message, 0, 0, 0)
-//        password.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.password, 0, 0, 0)
-//
-//
-//        email.addTextChangedListener(loginTextWatcher)
-//        password.addTextChangedListener(loginTextWatcher)
-//
-//
-//        email.addTextChangedListener(object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-//            {
-//            }
-//
-//            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-//            {
-//
-//            }
-//
-//            override fun afterTextChanged(s: Editable)
-//            {
-//                if (s.length != 0)
-//                {
-//                    var drawable = resources.getDrawable(R.drawable.message) //Your drawable image
-//                    drawable = DrawableCompat.wrap(drawable!!)
-//                    DrawableCompat.setTint(drawable, resources.getColor(R.color.colordarkblue)) // Set whatever color you want
-//                    DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                    email.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                    email.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.message),
-//                        null, resources.getDrawable(R.drawable.cancel), null)
-//                }
-//                else if (s.length == 0)
-//                {
-//                    email.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.message,
-//                        0, 0, 0)
-//                    var drawable = resources.getDrawable(R.drawable.message) //Your drawable image
-//                    drawable = DrawableCompat.wrap(drawable!!)
-//                    DrawableCompat.setTint(drawable, resources.getColor(R.color.colorDefault)) // Set whatever color you want
-//                    DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                    email.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                    email.setCompoundDrawablesWithIntrinsicBounds(
-//                        resources.getDrawable(R.drawable.message),
-//                        null, null, null
-//                    )
-//                }
-//            }
-//        })
-//
-//        password.addTextChangedListener(object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-//            {
-//
-//            }
-//
-//            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-//            {
-//
-//            }
-//
-//            override fun afterTextChanged(s: Editable)
-//            {
-//                if (s.length != 0)
-//                {
-//                    var drawable = resources.getDrawable(R.drawable.password) //Your drawable image
-//                    drawable = DrawableCompat.wrap(drawable!!)
-//                    DrawableCompat.setTint(drawable, resources.getColor(R.color.colordarkblue)) // Set whatever color you want
-//                    DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                    password.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                    password.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.password),
-//                        null, resources.getDrawable(R.drawable.cancel), null)
-//                }
-//                else if (s.length == 0)
-//                {
-//                    password.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.password,
-//                        0, 0, 0)
-//                    var drawable = resources.getDrawable(R.drawable.password) //Your drawable image
-//                    drawable = DrawableCompat.wrap(drawable!!)
-//                    DrawableCompat.setTint(drawable, resources.getColor(R.color.colorDefault)) // Set whatever color you want
-//                    DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN)
-//                    password.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-//                    password.setCompoundDrawablesWithIntrinsicBounds(resources.getDrawable(R.drawable.password),
-//                        null, null, null
-//                    )
-//                }
-//            }
-//        })
-//
-//        email.setOnTouchListener(View.OnTouchListener { v, event ->
-//
-//            if (event.action == MotionEvent.ACTION_DOWN)
-//            {
-//                if (email.getCompoundDrawables().get(2) != null)
-//                {
-//                    if (event.x >= email.getRight() - email.getLeft() -
-//                        email.getCompoundDrawables().get(2).getBounds().width())
-//                    {
-//                        if (email.getText().toString() != "")
-//                        {
-//                            email.setText("")
-//                        }
-//                    }
-//                }
-//            }
-//            false
-//        })
-//
-//        password.setOnTouchListener(View.OnTouchListener { v, event ->
-//
-//            if (event.action == MotionEvent.ACTION_DOWN)
-//            {
-//                if (password.getCompoundDrawables().get(2) != null)
-//                {
-//                    if (event.x >= password.getRight() - password.getLeft() -
-//                        password.getCompoundDrawables().get(2).getBounds().width()
-//                    )
-//                    {
-//                        if (password.getText().toString() != "")
-//                        {
-//                            password.setText("")
-//                        }
-//                    }
-//                }
-//            }
-//            false
-//        })
-//
-//        remember_password.setOnClickListener(View.OnClickListener {
-//
-//            if (!(remember_password.isSelected)) {
-//                remember_password.isChecked = true
-//                remember_password.isSelected = true
-//            } else {
-//                remember_password.isChecked = false
-//                remember_password.isSelected = false
-//            }
-//        })
-//    }
-//
-//    private val loginTextWatcher: TextWatcher = object : TextWatcher {
-//
-//        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int)
-//        {
-//
-//
-//        }
-//
-//        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int)
-//        {
-//
-//
-//        }
-//
-//        override fun afterTextChanged(s: Editable)
-//        {
-//            val mUsername: String = email.getText().toString().trim()
-//            val mPassword: String = password.getText().toString().trim()
-//            val t = !mUsername.isEmpty() && !mPassword.isEmpty()
-//            if (t)
-//            {
-//                login_button.setBackgroundResource(R.color.colordarkblue)
-//            }
-//            else
-//            {
-//                login_button.setBackgroundResource(R.color.colorwhiteblueshade)
-//            }
-//
-//        }
-//    }
-//
-//    override fun onStart()
-//    {
-//        super.onStart()
-//        val mUsername: String = email.getText().toString().trim()
-//        val mPassword: String = password.getText().toString().trim()
-//        val t = !mUsername.isEmpty() && !mPassword.isEmpty()
-//        if (t)
-//        {
-//            login_button.setBackgroundResource(R.color.colordarkblue)
-//        }
-//        else
-//        {
-//            login_button.setBackgroundResource(R.color.colorwhiteblueshade)
-//        }
-//    }
-//}
