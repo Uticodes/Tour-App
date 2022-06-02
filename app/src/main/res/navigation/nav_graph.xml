@@ -27,6 +27,9 @@
         <action
             android:id="@+id/to_ToursFragment"
             app:destination="@id/ToursFragment" />
+        <action
+            android:id="@+id/to_AddTourFragment"
+            app:destination="@id/AddTourFragment" />
     </fragment>
     <fragment
         android:id="@+id/AddTourFragment"

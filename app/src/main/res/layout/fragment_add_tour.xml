@@ -1,122 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_margin="20dp"
     tools:context=".tour.AddTourFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginBottom="30dp">
 
-    <EditText
-        android:id="@+id/countryName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginRight="20dp"
-        android:drawablePadding="10dp"
-        android:hint="@string/country_name"
-        android:inputType="textEmailAddress"
-        android:paddingBottom="20dp">
-    </EditText>
-
-
-    <EditText
-        android:id="@+id/placeName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="11dp"
-        android:layout_marginRight="20dp"
-        android:drawablePadding="10dp"
-        android:hint="@string/enter_place_name"
-        android:inputType="textPassword"
-        android:paddingBottom="20dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="11dp"
-        android:layout_gravity="center_horizontal">
 
         <EditText
-            android:id="@+id/startDate"
-            android:layout_width="0dp"
+            android:id="@+id/placeName"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight=".5"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:hint="@string/start_date"
-            android:inputType="datetime">
-        </EditText>
+            android:layout_marginTop="11dp"
+            android:hint="@string/enter_place_name"
+            android:inputType="text"
+            android:paddingBottom="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/endDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:hint="@string/end_date"
-            android:inputType="datetime" />
-    </LinearLayout>
+            android:id="@+id/placeDescription"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="@string/enter_place_description"
+            android:inputType="textMultiLine"
+            android:paddingBottom="20dp"
+            android:layout_marginTop="11dp"
+            android:scrollbars="vertical"
+            app:layout_constraintTop_toBottomOf="@id/placeName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/placeName" />
 
-    <EditText
-        android:id="@+id/placeDescription"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="11dp"
-        android:layout_marginRight="20dp"
-        android:drawablePadding="10dp"
-        android:hint="@string/enter_place_description"
-        android:inputType="textPassword"
-        android:paddingBottom="20dp" />
+        <Button
+            android:id="@+id/chooseImageBtn"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/teal_700"
+            android:enabled="true"
+            android:text="@string/choose_image"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/placeDescription"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/placeName" />
 
-    <Button
-        android:id="@+id/chooseImageBtn"
-        android:layout_height="55dp"
-        android:layout_width="match_parent"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginRight="20dp"
-        android:backgroundTint="@color/teal_700"
-        android:enabled="true"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        android:text="@string/choose_image"
-        android:textAllCaps="false"/>
-
-    <ImageView
-        android:id="@+id/placeImageView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        tools:srcCompat="@tools:sample/avatars" />
+        <ImageView
+            android:id="@+id/previewImageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:srcCompat="@tools:sample/avatars"
+            app:layout_constraintTop_toBottomOf="@id/chooseImageBtn"/>
 
     <Button
         android:id="@+id/uploadBtn"
-        android:layout_height="50dp"
+        android:layout_height="55dp"
         android:layout_width="match_parent"
-        android:layout_marginLeft="20dp"
         android:layout_marginTop="50dp"
-        android:layout_marginRight="20dp"
-        android:background="@color/teal_700"
-        android:backgroundTint="@color/teal_700"
-        android:enabled="true"
+        android:backgroundTint="@color/yellow"
         android:textSize="20sp"
         android:layout_marginBottom="30dp"
         android:textColor="@color/white"
         android:text="@string/upload"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/previewImageView"/>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

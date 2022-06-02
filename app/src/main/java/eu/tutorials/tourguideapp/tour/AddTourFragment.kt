@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -11,47 +12,47 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.MimeTypeMap
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
+import eu.tutorials.Constants
+import eu.tutorials.Constants.EXTERNAL_STORAGE_REQUEST_CODE
+import eu.tutorials.Constants.URI_REQUEST_CODE
+import eu.tutorials.tourguideapp.FirestoreImplementations
+import eu.tutorials.tourguideapp.data.Tour
+import eu.tutorials.tourguideapp.data.TourImage
 import eu.tutorials.tourguideapp.databinding.FragmentAddTourBinding
+import eu.tutorials.tourguideapp.utils.SharedPrefUtils
 import java.io.IOException
 
 
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AddTourFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+@Suppress("DEPRECATION")
 class AddTourFragment : Fragment() {
-    private val TAG = AddTourFragment::class.java.simpleName
-
-    private val EXTERNALSTORAGEREQUESTCODE = 100
-    private val URIREQUESTCODE = 101
+    private val TAG = "AddTourFragment"
 
     private var _binding: FragmentAddTourBinding? = null
+    private var tour: Tour? = null
+
+    private var placeName: String = ""
+    private var startDate: String = ""
+    private var endDate: String = ""
+    private var placeImageView: ImageView? = null
+    private var placeDescription: String = ""
+
     private val binding get() = _binding!!
     var db = FirebaseFirestore.getInstance()
-    // A global variable for URI of a selected image from phone storage.
-    private var selectedImageFileUri: Uri? = null
 
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    // A global variable for URI of a selected image from phone storage.
+    private lateinit var selectedImageFileUri: Uri
+    //private lateinit var selectedBitmapImage: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -64,51 +65,91 @@ class AddTourFragment : Fragment() {
 
     }
 
+    override fun onStart() {
+        super.onStart()
+        FirestoreImplementations().getUserInfo()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        tour = arguments?.getParcelable(Constants.TOUR_KEY)
+
+        // TODO Step : Get intent argument.
+        // START
+        Log.d(TAG, "Argument===: $tour")
+        if (tour != null){
+            with(binding) {
+                placeName.setText(tour?.placeName)
+                placeDescription.setText(tour?.description)
+                previewImageView.setImageURI(tour?.placeImage?.toUri())
+            }
+        }
+        // END
+
+//        if (tour != null){
+//            binding.uploadBtn.visibility = View.GONE
+//            //binding.uploadEditBtn.visibility = View.VISIBLE
+//        }else {
+//            binding.uploadBtn.visibility = View.VISIBLE
+//            //binding.uploadEditBtn.visibility = View.GONE
+//        }
+        //countryName = binding.countryName.text.toString().trim()
+        placeName = binding.placeName.text.toString().trim()
+        //startDate = binding.startDate.text.toString().trim()
+        //endDate = binding.endDate.text.toString().trim()
+        placeImageView = binding.previewImageView
+        placeDescription = binding.placeDescription.text.toString().trim()
+
 
         binding.apply {
-            uploadBtn.setOnClickListener {
-                startActivity(Intent(requireActivity(), ToursActivity()::class.java))
-                //findNavController().navigate(R.id.to_ToursFragment)
-            }
 
             // TODO Step : Upload tour info to the cloud firestore.
             // START
             uploadBtn.setOnClickListener {
-                addItems()
+                val  ImageDownloadUrl = SharedPrefUtils(requireContext()).getImageDownloadUrl()
+                addTour()
             }
             // END
 
-            chooseImageBtn.setOnClickListener {
-                //TODO Open gallery and get image
-                if (ContextCompat.checkSelfPermission(
-                        requireContext(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    )
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    // TODO Step : Now after the permission is granted write the code to select the image.
-                    // START
-                    // An intent for launching the image selection of phone storage.
-                    val galleryIntent = Intent(
-                        Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    )
-                    // Launches the selected image using the constant code.
-                    startActivityForResult(galleryIntent, URIREQUESTCODE)
-                    // END
-                } else {
-                    /*Requests permissions to be granted to this application. These permissions
-                     must be requested in your manifest, they should not be granted to your app,
-                     and they should have protection level*/
-                    ActivityCompat.requestPermissions(
-                        requireActivity(),
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        EXTERNALSTORAGEREQUESTCODE
-                    )
-                }
-            }
+            // TODO Step : Upload Edited tour info to the cloud firestore.
+            // START
+            //uploadEditBtn.setOnClickListener { editTour(tour) }
+            // END
+
+            // TODO Step : Select an image from device.
+            // START
+            chooseImageBtn.setOnClickListener { checkPermissions() }
+            // END
+        }
+    }
+
+    private fun checkPermissions() {
+        //TODO Open gallery and get image
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO Step : Now after the permission is granted write the code to select the image.
+            // START
+            // An intent for launching the image selection of phone storage.
+            val galleryIntent = Intent(
+                Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            )
+            // Launches the selected image using the constant code.
+            startActivityForResult(galleryIntent, URI_REQUEST_CODE)
+            // END
+        } else {
+            /*Requests permissions to be granted to this application. These permissions
+             must be requested in your manifest, they should not be granted to your app,
+             and they should have protection level*/
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                EXTERNAL_STORAGE_REQUEST_CODE
+            )
         }
     }
 
@@ -127,7 +168,7 @@ class AddTourFragment : Fragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == EXTERNALSTORAGEREQUESTCODE) {
+        if (requestCode == EXTERNAL_STORAGE_REQUEST_CODE) {
             //If permission is granted
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // TODO Step : After the permission is granted, implement image selection.
@@ -137,14 +178,14 @@ class AddTourFragment : Fragment() {
                     Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 )
-                // Launches the image selection of phone storage using the constant code.
-                startActivityForResult(galleryIntent, URIREQUESTCODE)
+                // Launches the image gallery of phone storage using the constant code.
+                startActivityForResult(galleryIntent, URI_REQUEST_CODE)
                 // END
             } else {
                 //Displaying another toast if permission is not granted
                 Toast.makeText(
                     requireContext(),
-                    "Oops, storage permission denied. You can also allow it from settings.",
+                    "Storage permission denied. You can also allow it from settings.",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -171,7 +212,7 @@ class AddTourFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == URIREQUESTCODE) {
+            if (requestCode == URI_REQUEST_CODE) {
                 if (data != null) {
                     try {
 
@@ -179,8 +220,18 @@ class AddTourFragment : Fragment() {
                         // START
                         // The uri of selected image from phone storage.
                         selectedImageFileUri = data.data!!
-                        binding.placeImageView.visibility = View.VISIBLE
-                        binding.placeImageView.setImageURI(selectedImageFileUri)
+                        binding.previewImageView.visibility = View.VISIBLE
+
+                        FirestoreImplementations().uploadImageToFirebaseStorage(selectedImageFileUri, this)
+//                        val bitmap = MediaStore.Images.Media.getBitmap(
+//                            requireContext().contentResolver,
+//                            selectedImageFileUri
+//                        )
+                        //selectedBitmapImage = bitmap
+                        binding.previewImageView.setImageURI(selectedImageFileUri)
+
+                        //selectedBitmapImage = bitmapImage
+                        Log.d(TAG, "Selected Image Uri file ||| === ${selectedImageFileUri}")
                         Log.d(TAG, "Showing image Uri $selectedImageFileUri")
                         // END
                     } catch (e: IOException) {
@@ -193,6 +244,9 @@ class AddTourFragment : Fragment() {
                             .show()
                     }
                 }
+            } else {
+                // A log is printed when user close or cancel the image selection.
+                Log.e("InvalidRequestCode", "Invalid request code")
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
             // A log is printed when user close or cancel the image selection.
@@ -201,54 +255,30 @@ class AddTourFragment : Fragment() {
     }
     // END
 
-    private fun setUpAddTours(){
 
-    }
+    private fun addTour() {
+        placeName = binding.placeName.text.toString().trim()
+        placeImageView = binding.previewImageView
+        placeDescription = binding.placeDescription.text.toString().trim()
+        val imgUrl = TourImage()
 
-    private fun addItems(){
-        val countryName = binding.countryName.text.toString().trim()
-        val placeName = binding.placeName.text.toString().trim()
-        val startDate = binding.startDate.text.toString().trim()
-        val endDate = binding.endDate.text.toString().trim()
-        val placeImageView = binding.placeImageView
-        val placeDescription = binding.placeDescription.text.toString().trim()
-
-        // Create a new user with a first and last name
-        val tour = hashMapOf(
-            "countryName" to countryName,
-            "placeName" to placeName,
-            "startDate" to startDate,
-            "endDate" to endDate,
-            "description" to placeDescription,
-            "placeImage" to selectedImageFileUri
-        )
+//        val bm = (placeImageView?.drawable as BitmapDrawable).bitmap
+//        Log.d(TAG, "Showing bitmap from placeImageView===: $bm")
+//        Log.d(TAG, "Showing bitmap from placeImageView===: $bm")
 
         // Add a new Tour document with a generated ID
-        if (countryName.isNotEmpty() && placeName.isNotEmpty()
-            && startDate.isNotEmpty() && endDate.isNotEmpty()
-            && placeDescription.isNotEmpty() && selectedImageFileUri != null){
-            db.collection("addATour")
-                .add(tour)
-                .addOnSuccessListener { documentReference ->
-                    Toast.makeText(
-                        requireContext(),
-                        "Tour added successfully",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.d(TAG, "Tour DocumentSnapshot added with ID: ${documentReference.id}")
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(
-                        requireContext(),
-                        "Error adding document $e" ,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.w(TAG, "Error adding document", e)
-                }
+        if (placeName.isNotEmpty() && placeDescription.isNotEmpty()
+            && placeImageView?.drawable != null
+        ) {
+            FirestoreImplementations().addTour(
+                placeName,
+                placeDescription,
+                this,
+            )
         } else {
             Toast.makeText(
                 requireContext(),
-                "Kindly check that all information are provided and try again" ,
+                "Kindly check that all information are provided and try again",
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -256,23 +286,36 @@ class AddTourFragment : Fragment() {
 
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AddTourFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AddTourFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun editTour(tour: Tour?){
+
+        if (tour != null) {
+            // Update existing Tour document
+            if (placeName.isNotEmpty() && startDate.isNotEmpty()
+                && endDate.isNotEmpty() && placeDescription.isNotEmpty()
+            ) {
+
+                FirestoreImplementations().editTour(
+                    tour.id.toString(),
+                    placeName,
+                    startDate,
+                    endDate,
+                    placeDescription,
+                    selectedImageFileUri.toString(),
+                    this
+                )
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Kindly check that all information are provided and try again",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+        }else {
+            Toast.makeText(
+                requireContext(),
+                "Tour intent argument is null",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }

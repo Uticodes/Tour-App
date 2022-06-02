@@ -1,13 +1,22 @@
 package eu.tutorials.tourguideapp.data
 
+import android.net.Uri
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import kotlinx.android.parcel.Parcelize
+import java.util.*
 
+@Parcelize
 data class Tour(
-    val id: Long,
-    val countryName: String,
-    val placeName: String,
-    val date: String,
-    val description: String,
-    @DrawableRes
-    val placeImage: Int?,
+    var id: String? = null,
+    var placeName: String? = null,
+    var date: Date? = null,
+    var description: String? = null,
+    var authorName: String? = null,
+    var placeImage: String? = null,
+) : Parcelable
+
+data class TourImage(
+    var imageDownloadUrl: Uri? = null
 )

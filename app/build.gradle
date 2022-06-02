@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
+    //TODO : Add parcelable plugin
+    id("kotlin-parcelize")
 }
 
 android {
@@ -45,6 +47,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.4.0"
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.13.0'
+    implementation 'com.google.firebase:firebase-storage-ktx:20.0.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
     //Firebase
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
