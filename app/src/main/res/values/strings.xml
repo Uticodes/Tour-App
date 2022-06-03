@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">TourGuideApp</string>
     <string name="empty_tour">No Tours added yet, \nClick on the + button to add a tour</string>
-    <string name="location">Location</string>
+    <string name="author">Author: %s</string>
+    <string name="place">Place</string>
     <string name="view_on_google_maps">View on Google Maps</string>
     <string name="date">Date</string>
     <string name="tour_date">12 Jan, 2021 – 24 Jan, 2021</string>
@@ -46,5 +47,6 @@
     <string name="choose_image">Choose Image</string>
     <string name="enter_place_description">Enter Place Description</string>
     <string name="enter_place_name">Enter Place Name</string>
+    <string name="tour_feeds">Tour Feeds</string>
 
 </resources>

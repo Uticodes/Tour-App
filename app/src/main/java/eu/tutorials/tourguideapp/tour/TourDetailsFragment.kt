@@ -12,11 +12,13 @@ import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import eu.tutorials.Constants
+import eu.tutorials.Constants.showToast
 import eu.tutorials.Constants.spannableString
 import eu.tutorials.tourguideapp.FirestoreImplementations
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.Tour
 import eu.tutorials.tourguideapp.databinding.FragmentTourDetailsBinding
+import eu.tutorials.tourguideapp.utils.Resource
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -25,9 +27,9 @@ class TourDetailsFragment : Fragment() {
     private val TAG = TourDetailsFragment::class.java.simpleName
     private var tour: Tour? = null
     private var _binding: FragmentTourDetailsBinding? = null
+    private var documentId: String = ""
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -44,43 +46,62 @@ class TourDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         tour = arguments?.getParcelable(Constants.TOUR_KEY)
-
+        documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
 
         binding.apply {
-//            val mSpannableString = SpannableString(getString(R.string.view_on_google_maps))
-//            mSpannableString.setSpan(UnderlineSpan(), 0, mSpannableString.length, 0)
-//            binding.viewOnMap.text = mSpannableString
 
-            Log.d(TAG, "Argument => ${tour?.placeName} || ${tour?.description}")
+            Log.d(TAG, "Argument =>:|: DocumentId $documentId ${tour?.placeName} || ${tour?.description}")
 
-            binding.placeNameTextView.text = tour?.placeName
-            binding.dateTextView.text = tour?.date.toString()
-            binding.descriptionTextView.text = tour?.description
-            //decodeBitmapImage(tour?.placeImage ?: "", binding.placeImageView)
-
-            spannableString(requireContext(), binding.viewOnMap)
-//            countryTextView.text = getString(R.string.country_name1)
-//            placeNameTextView.text = getString(R.string.place_name1)
-//            dateTextView.text = getString(R.string.tour_date)
-//            descriptionTextView.text = getString(R.string.tour_description)
+            placeNameTextView.text = tour?.placeName
+            dateTextView.text = tour?.date.toString()
+            descriptionTextView.text = tour?.description
+            authorsNameTextView.text = getString(R.string.author, tour?.authorsName)
             Glide.with(requireContext())
                 .load(tour?.placeImage)
                 .placeholder(R.drawable.babs_dock)
-                .into(binding.placeImageView)
+                .into(placeImageView)
 
             editBtn.setOnClickListener {
                 val args = Bundle()
                 args.putParcelable(Constants.TOUR_KEY, tour)
-                //Toast.makeText(requireContext(), "Edit button Clicked", Toast.LENGTH_SHORT).show()
+                args.putString(Constants.DOCUMENT_ID_KEY, documentId)
                 findNavController().navigate(R.id.to_AddTourFragment, args)
             }
             deleteBtn.setOnClickListener {
-                FirestoreImplementations().deleteATour(tour, nav = {
-                    findNavController().navigate(R.id.to_ToursFragment)
-                }, this@TourDetailsFragment)
-//                Toast.makeText(requireContext(), "Delete button Clicked", Toast.LENGTH_SHORT).show()
-
+                FirestoreImplementations().deleteATour(
+                    documentId,
+                    result = { result->
+                        when(result){
+                            is Resource.Loading -> showProgressBar()
+                            is Resource.Success -> {
+                                hideProgressBar()
+                                showToast("Tour deleted successfully")
+                                findNavController().popBackStack()
+                            }
+                            is Resource.Failure -> {
+                                hideProgressBar()
+                                showToast(result.message)
+                            }
+                        }
+                    }
+                )
             }
+        }
+    }
+
+    private fun hideProgressBar() {
+        binding.apply {
+            tourDetailsProgressBar.visibility = View.INVISIBLE
+            deleteBtn.isEnabled = true
+            editBtn.isEnabled = true
+        }
+    }
+
+    private fun showProgressBar() {
+        binding.apply {
+            tourDetailsProgressBar.visibility = View.VISIBLE
+            deleteBtn.isEnabled = false
+            editBtn.isEnabled = false
         }
     }
 

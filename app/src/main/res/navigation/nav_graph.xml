@@ -17,6 +17,9 @@
         <action
             android:id="@+id/to_AddTourFragment"
             app:destination="@id/AddTourFragment" />
+        <action
+            android:id="@+id/to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/TourDetailsFragment"
@@ -41,4 +44,9 @@
             android:id="@+id/to_toursFragment"
             app:destination="@id/ToursFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="eu.tutorials.tourguideapp.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>

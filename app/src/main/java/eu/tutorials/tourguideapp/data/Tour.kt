@@ -13,7 +13,7 @@ data class Tour(
     var placeName: String? = null,
     var date: Date? = null,
     var description: String? = null,
-    var authorName: String? = null,
+    var authorsName: String? = null,
     var placeImage: String? = null,
 ) : Parcelable
 
