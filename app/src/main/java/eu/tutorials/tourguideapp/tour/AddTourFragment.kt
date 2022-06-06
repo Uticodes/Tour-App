@@ -19,6 +19,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import eu.tutorials.Constants
 import eu.tutorials.Constants.EXTERNAL_STORAGE_REQUEST_CODE
@@ -31,6 +32,8 @@ import eu.tutorials.tourguideapp.databinding.FragmentAddTourBinding
 import eu.tutorials.tourguideapp.utils.Resource
 import eu.tutorials.tourguideapp.utils.SharedPrefUtils
 import java.io.IOException
+import java.util.*
+import kotlin.properties.Delegates
 
 
 @Suppress("DEPRECATION")
@@ -45,6 +48,8 @@ class AddTourFragment : Fragment() {
     private var placeImageView: ImageView? = null
     private var placeDescription: String = ""
     private var documentId: String? = ""
+    val appUser = Constants.sessionUser
+    private var isUploadNewImageForEdit by Delegates.notNull<Boolean>()
 
     private val binding get() = _binding!!
     var db = FirebaseFirestore.getInstance()
@@ -77,10 +82,12 @@ class AddTourFragment : Fragment() {
         tour = arguments?.getParcelable(Constants.TOUR_KEY)
         documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
 
+        isUploadNewImageForEdit = false
+
         // TODO Step : Get intent argument.
         // START
         Log.d(TAG, "Argument===: $tour")
-        if (tour != null){
+        if (tour != null) {
             with(binding) {
                 placeName.setText(tour?.placeName)
                 placeDescription.setText(tour?.description)
@@ -108,7 +115,7 @@ class AddTourFragment : Fragment() {
             // TODO Step : Upload tour info to the cloud firestore.
             // START
             uploadBtn.setOnClickListener {
-                if (tour != null){
+                if (tour != null) {
                     editTour(tour)
                 } else {
                     showProgressBar()
@@ -223,7 +230,7 @@ class AddTourFragment : Fragment() {
                         // The uri of selected image from phone storage.
                         selectedImageFileUri = data.data!!
                         binding.previewImageView.visibility = View.VISIBLE
-
+                        isUploadNewImageForEdit = true
                         //FirestoreImplementations().uploadImageToFirebaseStorage(selectedImageFileUri, this)
 //                        val bitmap = MediaStore.Images.Media.getBitmap(
 //                            requireContext().contentResolver,
@@ -259,69 +266,83 @@ class AddTourFragment : Fragment() {
 
 
     private fun addTour() {
+        //var user = FirestoreImplementations().user
         placeName = binding.placeName.text.toString().trim()
         placeImageView = binding.previewImageView
         placeDescription = binding.placeDescription.text.toString().trim()
+        val uniqueId = UUID.randomUUID().toString()
 
-        // Add a new Tour document with a generated ID
+        val tour = Tour(
+            id = uniqueId,
+            placeName = placeName,
+            date = Date(),
+            description = placeDescription,
+            authorsName = appUser?.name ?: "",
+            email = appUser?.email ?: "",
+            //placeImage = selectedImageFileUri.toString()
+        )
+
+    // Add a new Tour document with a generated ID
+    if (placeName.isNotEmpty() && placeDescription.isNotEmpty()
+    && placeImageView?.drawable != null
+    ) {
+        FirestoreImplementations().addTour(
+            tour,
+            selectedImageFileUri ?: "".toUri(),
+            result = { result ->
+                when (result) {
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        showToast("Tour uploaded successfully")
+                        findNavController().popBackStack()
+                    }
+                    is Resource.Failure -> {
+                        showToast(result.message)
+                    }
+
+                }
+            }
+        )
+    } else {
+        showToast("Kindly check that all information are provided and try again")
+    }
+
+
+}
+
+private fun editTour(tour: Tour?) {
+
+    if (tour != null) {
+        val placeName = binding.placeName.text.toString().trim()
+        val placeDescription = binding.placeDescription.text.toString().trim()
+        // Update existing Tour document
         if (placeName.isNotEmpty() && placeDescription.isNotEmpty()
-            && placeImageView?.drawable != null
         ) {
-            FirestoreImplementations().addTour(
-                placeName,
-                placeDescription,
-                selectedImageFileUri ?: "".toUri(),
+
+            //tour.placeImage?.toUri()?.let {
+            FirestoreImplementations().editTour(
+                tour.copy(
+                    placeName = placeName,
+                    description = placeDescription
+                ),
+                isUploadNewImageForEdit,
+                selectedImageFileUri  ?: "".toUri(),
                 result = { result ->
-                    when(result){
+                    when (result) {
                         is Resource.Loading -> showProgressBar()
                         is Resource.Success -> {
                             hideProgressBar()
-                            showToast("Tour uploaded successfully")
-                            findNavController().popBackStack()
+                            showToast("Tour edited successfully")
+                            findNavController().navigate(R.id.nav_graph)
                         }
                         is Resource.Failure -> {
                             showToast(result.message)
                         }
-
                     }
                 }
             )
-        } else {
-            showToast("Kindly check that all information are provided and try again")
-        }
-
-
-    }
-
-    private fun editTour(tour: Tour?){
-
-        if (tour != null) {
-            // Update existing Tour document
-            if (placeName.isNotEmpty() && placeDescription.isNotEmpty()
-                && tour.placeImage != null
-            ) {
-                //tour.placeImage?.toUri()?.let {
-                    FirestoreImplementations().editTour(
-                        tourId,
-                        documentId.toString(),
-                        placeName,
-                        placeDescription,
-                        tour.placeImage?.toUri()!!,
-                        result = { result->
-                            when(result) {
-                                is Resource.Loading -> showProgressBar()
-                                is Resource.Success -> {
-                                    hideProgressBar()
-                                    showToast("Tour edited successfully")
-                                    findNavController().navigate(R.id.nav_graph)
-                                }
-                                is Resource.Failure -> {
-                                    showToast(result.message)
-                                }
-                            }
-                        }
-                    )
-               // }
+            // }
 
 //                if (selectedImageFileUri.toString().isNotEmpty()){
 //                    FirestoreImplementations().editTour(
@@ -368,28 +389,28 @@ class AddTourFragment : Fragment() {
 //                }
 
 
-            } else {
-                showToast("Kindly check that all information are provided and try again")
-            }
-        }else {
-            Log.d("AddTourFragment", "Tour intent argument is null")
-            //showToast("Tour intent argument is null",)
+        } else {
+            showToast("Kindly check that all information are provided and try again")
         }
+    } else {
+        Log.d("AddTourFragment", "Tour intent argument is null")
+        //showToast("Tour intent argument is null",)
     }
+}
 
-    private fun hideProgressBar() {
-        binding.apply {
-            addTourProgressBar.visibility = View.INVISIBLE
-            uploadBtn.isEnabled = true
-            chooseImageBtn.isEnabled = true
-        }
+private fun hideProgressBar() {
+    binding.apply {
+        addTourProgressBar.visibility = View.INVISIBLE
+        uploadBtn.isEnabled = true
+        chooseImageBtn.isEnabled = true
     }
+}
 
-    private fun showProgressBar() {
-        binding.apply {
-            addTourProgressBar.visibility = View.VISIBLE
-            uploadBtn.isEnabled = false
-            chooseImageBtn.isEnabled = false
-        }
+private fun showProgressBar() {
+    binding.apply {
+        addTourProgressBar.visibility = View.VISIBLE
+        uploadBtn.isEnabled = false
+        chooseImageBtn.isEnabled = false
     }
+}
 }

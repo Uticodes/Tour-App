@@ -23,7 +23,7 @@ class ProfileFragment : Fragment() {
     private val TAG = "ProfileFragment"
     private var _binding: FragmentProfileBinding? = null
     private var user: User? = null
-    protected val appUser = Constants.sessionUser
+    val appUser = Constants.sessionUser
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!

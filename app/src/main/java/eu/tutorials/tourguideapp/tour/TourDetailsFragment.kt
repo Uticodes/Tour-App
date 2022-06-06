@@ -27,7 +27,7 @@ class TourDetailsFragment : Fragment() {
     private val TAG = TourDetailsFragment::class.java.simpleName
     private var tour: Tour? = null
     private var _binding: FragmentTourDetailsBinding? = null
-    private var documentId: String = ""
+    //private var documentId: String = ""
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
@@ -46,11 +46,11 @@ class TourDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         tour = arguments?.getParcelable(Constants.TOUR_KEY)
-        documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
+        //documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
 
         binding.apply {
 
-            Log.d(TAG, "Argument =>:|: DocumentId $documentId ${tour?.placeName} || ${tour?.description}")
+            Log.d(TAG, "Argument =>:|: DocumentId ${tour?.id} ${tour?.placeName} || ${tour?.description}")
 
             placeNameTextView.text = tour?.placeName
             dateTextView.text = tour?.date.toString()
@@ -64,12 +64,12 @@ class TourDetailsFragment : Fragment() {
             editBtn.setOnClickListener {
                 val args = Bundle()
                 args.putParcelable(Constants.TOUR_KEY, tour)
-                args.putString(Constants.DOCUMENT_ID_KEY, documentId)
+                //args.putString(Constants.DOCUMENT_ID_KEY, documentId)
                 findNavController().navigate(R.id.to_AddTourFragment, args)
             }
             deleteBtn.setOnClickListener {
                 FirestoreImplementations().deleteATour(
-                    documentId,
+                    tour?.id.toString(),
                     result = { result->
                         when(result){
                             is Resource.Loading -> showProgressBar()

@@ -1,35 +1,26 @@
 package eu.tutorials.tourguideapp
 
 import android.app.Activity
-import android.content.Context.MODE_PRIVATE
-import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import eu.tutorials.Constants
 import eu.tutorials.Constants.COLLECTION_TOURS
 import eu.tutorials.Constants.COLLECTION_USERS
 import eu.tutorials.tourguideapp.data.Tour
-import eu.tutorials.tourguideapp.data.TourImage
 import eu.tutorials.tourguideapp.data.User
 import eu.tutorials.tourguideapp.login.LoginActivity
-import eu.tutorials.tourguideapp.tour.AddTourFragment
-import eu.tutorials.tourguideapp.tour.TourDetailsFragment
-import eu.tutorials.tourguideapp.tour.ToursActivity
 import eu.tutorials.tourguideapp.utils.Resource
-import eu.tutorials.tourguideapp.utils.SharedPrefUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 
 
@@ -93,10 +84,11 @@ class FirestoreImplementations() {
         userName: String,
         userEmail: String,
         userPassword: String,
-        result: (Resource<Unit>) -> Unit
+        result: (Resource<Unit>) -> Unit,
+        context: LoginActivity
     ) {
         firebaseAuth.createUserWithEmailAndPassword(userEmail, userPassword)
-            .addOnCompleteListener(activityContext) { task ->
+            .addOnCompleteListener(context) { task ->
                 if (task.isSuccessful) {
                     Log.d("LoginActivity", "Show UserName:::: $userName")
                     saveUserToFirebaseDatabase(userName, userEmail)
@@ -193,7 +185,9 @@ class FirestoreImplementations() {
     // Get Session User Listens,
     private fun updateSessionUser(user: User?) {
         CoroutineScope(Dispatchers.Main).launch {
-            sessionHandler.initSession(user!!)
+            if (user != null) {
+                sessionHandler.initSession(user)
+            }
         }
     }
 
@@ -227,65 +221,71 @@ class FirestoreImplementations() {
 
     //TODO : Edit Tour info to firestore.
     fun editTour(
-        tourId: String, docId: String, placeName: String, placeDescription: String,
-        selectedBitmapImage: Uri, result: (Resource<Unit>) -> Unit
+       tour: Tour,
+       isUploadNewImage: Boolean,
+       selectedImageUri: Uri,
+       result: (Resource<Unit>) -> Unit
     ) {
 
-        // Create tour with details to be updated
-        val tour = mapOf(
-            "id" to tourId,
-            "placeName" to placeName,
-            "date" to Timestamp(Date()),
-            "authorsName" to user?.displayName,
-            "description" to placeDescription,
-            "placeImage" to selectedBitmapImage
-        )
+        Log.d("AddTourFragment", "Showing Tour items sent: $tour" )
 
-        // Add a new Tour document with a generated ID
-        tourRef.document("/$docId")
-            .set(tour)
-            .addOnSuccessListener { documentReference ->
-                result.invoke(Resource.Success(message = "Tour updated successfully"))
-                Log.d("AddTourFragment", "Tour DocumentSnapshot updated with ID: $docId, snapshotId::|:: $documentReference")
+        if (isUploadNewImage){
+            // Add a new Tour document with a generated ID
+            tourRef.document(tour.id)
+                .update(tour.toMap())
+                .addOnSuccessListener { documentReference ->
+                    result.invoke(Resource.Success(message = "Tour updated successfully"))
+                    Log.d("AddTourFragment", "Tour DocumentSnapshot updated with ID: ${tour.id}, snapshotId::|:: $documentReference")
+                }
+                .addOnFailureListener { e ->
+                    result.invoke(Resource.Failure("Error updating document $e"))
+                    Log.d("AddTourFragment", "Error updating document", e)
+                }
+        } else {
+            Log.d("AddTourFragment", "Added new image on EditTour: ${tour.placeImage}")
+
+            // Add a new Tour document with a generated ID
+//            tourRef.document(tour.id)
+//                .update(tour.toMap())
+//                .addOnSuccessListener { documentReference ->
+//                    result.invoke(Resource.Success(message = "Tour updated successfully"))
+//                    Log.d("AddTourFragment", "Tour DocumentSnapshot updated with ID: ${tour.id}, snapshotId::|:: $documentReference")
+//                }
+//                .addOnFailureListener { e ->
+//                    result.invoke(Resource.Failure("Error updating document $e"))
+//                    Log.d("AddTourFragment", "Error updating document", e)
+//                }
+            Log.d(
+                "AddTourFragment",
+                "TourImage link getSelectedImageUrl inside FbImp: $selectedImageUri"
+            )
+            uploadImageToFirebaseStorage(selectedImageUri) { imageUrl ->
+
+                if (imageUrl.toString().isNotEmpty()) {
+
+                    Log.d(
+                        "AddTourFragment",
+                        "TourImage link getDownloadImageUrl inside if-else: ${imageUrl}"
+                    )
+                    // Add a new Tour document with a generated ID
+                    tourRef.document(tour.id)
+                        .update(tour.copy(placeImage  = imageUrl.toString()).toMap())
+                        .addOnSuccessListener { documentReference ->
+                            result.invoke(Resource.Success(message = "Tour updated successfully"))
+                            Log.d("AddTourFragment", "Tour DocumentSnapshot updated with ID: ${tour.id}, snapshotId::|:: $documentReference")
+                        }
+                        .addOnFailureListener { e ->
+                            result.invoke(Resource.Failure("Error updating document $e"))
+                            Log.d("AddTourFragment", "Error updating document", e)
+                        }
+                } else {
+                    result.invoke(Resource.Failure("Image Url is null"))
+                    Log.d("AddTourFragment", "Image Url is null")
+                }
+
             }
-            .addOnFailureListener { e ->
-                result.invoke(Resource.Failure("Error updating document $e"))
-                Log.d("AddTourFragment", "Error updating document", e)
-            }
 
-
-        //Upload image to firebase and get download url
-//        uploadImageToFirebaseStorage(selectedBitmapImage) { imageUrl ->
-//
-//            if (imageUrl.toString().isNotEmpty()) {
-//                // Create a new tour details
-//                val tour = hashMapOf(
-//                    "placeName" to placeName,
-//                    "description" to placeDescription,
-//                    "placeImage" to imageUrl.toString()
-//                )
-//
-//                Log.d(
-//                    "AddTourFragment",
-//                    "TourImage link getDownloadImageUrl inside if-else: ${imageUrl}"
-//                )
-//                // Add a new Tour document with a generated ID
-//                tourRef.document("/$docId")
-//
-//                .set(tour)
-//                    .addOnSuccessListener { documentReference ->
-//                        result.invoke(Resource.Success(message = "Tour updated successfully"))
-//                        Log.d("AddTourFragment", "Tour DocumentSnapshot updated with ID: $documentReference")
-//                    }
-//                    .addOnFailureListener { e ->
-//                        result.invoke(Resource.Failure("Error updating document $e"))
-//                        Log.d("AddTourFragment", "Error updating document", e)
-//                    }
-//            } else {
-//                result.invoke(Resource.Failure("Image Url is null"))
-//                Log.d("AddTourFragment", "Image Url is null")
-//            }
-//        }
+        }
     }
 
     //TODO : Delete a Tour info from firestore.
@@ -322,34 +322,22 @@ class FirestoreImplementations() {
 
     //TODO : Add Tour info to firestore.
     fun addTour(
-        placeName: String, placeDescription: String,
-        selectedImageUri: Uri, result: (Resource<Unit>) -> Unit
+        tour: Tour, selectedImageUri:Uri, result: (Resource<Unit>) -> Unit
     ) {
 
-        val uniqueId = UUID.randomUUID().toString()
         Log.d("AddTourFragment", "User display name: ${user?.displayName}")
 
-        //Upload image to firebase and get download url
         uploadImageToFirebaseStorage(selectedImageUri) { imageUrl ->
 
             if (imageUrl.toString().isNotEmpty()) {
-                // Create a new tour details
-                val tour = hashMapOf(
-                    "id" to uniqueId,
-                    "placeName" to placeName,
-                    "date" to Timestamp(Date()),
-                    "authorsName" to user?.displayName,
-                    "description" to placeDescription,
-                    "placeImage" to imageUrl.toString()
-                )
+
                 Log.d(
                     "AddTourFragment",
                     "TourImage link getDownloadImageUrl inside if-else: ${imageUrl}"
                 )
                 // Add a new Tour document with a generated ID
-                tourRef.document("/$uniqueId")
-
-                tourRef.add(tour)
+                tourRef.document("/${tour.id}")
+                .set(tour.copy(placeImage  = imageUrl.toString()))
                     .addOnSuccessListener { documentReference ->
                         result.invoke(Resource.Success(message = "Tour uploaded successfully"))
                         Log.d("AddTourFragment", "Tour uploaded successfully:: ${documentReference}"  )

@@ -203,7 +203,8 @@ class LoginActivity : AppCompatActivity() {
                             showToast(result.message)
                         }
                     }
-                }
+                },
+                this
             )
         }
     }

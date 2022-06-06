@@ -18,6 +18,9 @@ import androidx.lifecycle.Observer
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.User
 import java.io.ByteArrayOutputStream
+import java.lang.String.format
+import java.text.DateFormat
+import java.util.*
 
 object Constants {
     private const val TAG = "Constants"
@@ -85,4 +88,10 @@ object Constants {
         Log.d(TAG, "init Session user $sessionUser")
     }
 
+//    fun getDate(timestamp: Long) :String {
+//        val calendar = Calendar.getInstance(Locale.ENGLISH)
+//        calendar.timeInMillis = timestamp * 1000L
+//        val date = DateFormat.format("dd-MM-yyyy",calendar).toString()
+//        return date
+//    }
 }

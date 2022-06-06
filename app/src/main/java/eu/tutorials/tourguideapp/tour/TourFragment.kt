@@ -57,6 +57,10 @@ class TourFragment : Fragment() {
             findNavController().navigate(R.id.to_profileFragment)
         }
         showProgressBar()
+    }
+
+    override fun onStart() {
+        super.onStart()
         setupListOfDataIntoRecyclerView(toursList = toursList)
     }
 
@@ -81,7 +85,6 @@ class TourFragment : Fragment() {
                 for (document in result.documents) {
                     val tour = document.toObject(Tour::class.java)
                     if (tour != null) {
-
                         toursList.add(tour)
                     }
 
@@ -144,7 +147,7 @@ class TourFragment : Fragment() {
     private fun itemOnClick(tour: Tour) {
         val args = Bundle()
         args.putParcelable(TOUR_KEY, tour)
-        args.putString(DOCUMENT_ID_KEY, documentId)
+        //args.putString(DOCUMENT_ID_KEY, documentId)
         findNavController().navigate(R.id.to_TourDetailsFragment, args)
     }
 

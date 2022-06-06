@@ -4,19 +4,30 @@ import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import com.google.firebase.Timestamp
+import com.google.type.DateTime
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
 data class Tour(
-    var id: String? = null,
-    var placeName: String? = null,
-    var date: Date? = null,
-    var description: String? = null,
-    var authorsName: String? = null,
-    var placeImage: String? = null,
-) : Parcelable
+    var id: String = "",
+    var placeName: String = "",
+    var date: Date = Date(),
+    var description: String = "",
+    var authorsName: String = "",
+    var email: String = "",
+    var placeImage: String = "",
+) : Parcelable {
 
-data class TourImage(
-    var imageDownloadUrl: Uri? = null
-)
+    fun toMap() =
+        mapOf(
+            "id" to id,
+            "placeName" to placeName,
+            "date" to date,
+            "description" to description,
+            "authorsName" to authorsName,
+            "email" to email,
+            "placeImage" to placeImage
+        )
+}
