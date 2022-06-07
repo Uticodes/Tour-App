@@ -1,25 +1,27 @@
 package eu.tutorials.tourguideapp.tour
 
-import android.content.Intent.getIntent
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import eu.tutorials.Constants.COLLECTION_TOURS
-import eu.tutorials.Constants.DOCUMENT_ID_KEY
 import eu.tutorials.Constants.TOUR_KEY
+import eu.tutorials.Constants.showToast
+import eu.tutorials.tourguideapp.FirestoreImplementations
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.adapter.ToursAdapter
 import eu.tutorials.tourguideapp.data.Tour
 import eu.tutorials.tourguideapp.databinding.FragmentToursBinding
+import eu.tutorials.tourguideapp.login.LoginActivity
 
 
 /**
@@ -28,6 +30,9 @@ import eu.tutorials.tourguideapp.databinding.FragmentToursBinding
 class TourFragment : Fragment() {
     private val TAG = "TourFragment"
     private var _binding: FragmentToursBinding? = null
+    // Declare FirebaseAuth instance
+    private var firebaseAuth = FirebaseAuth.getInstance()
+    // Declare Firestore instance
     var db = FirebaseFirestore.getInstance()
     private val tourRef = db.collection(COLLECTION_TOURS)
     val toursList: ArrayList<Tour> = ArrayList()
@@ -51,10 +56,10 @@ class TourFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.addATourBtn.setOnClickListener {
-            findNavController().navigate(R.id.to_AddTourFragment)
+            checkIfUserIsLoggedIn()
         }
         binding.profileBtn.setOnClickListener {
-            findNavController().navigate(R.id.to_profileFragment)
+            checkIfUserExist()
         }
         showProgressBar()
     }
@@ -62,6 +67,27 @@ class TourFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         setupListOfDataIntoRecyclerView(toursList = toursList)
+    }
+
+    private fun checkIfUserIsLoggedIn(){
+        if (firebaseAuth.currentUser != null){
+            FirestoreImplementations().getUserInfo()
+            findNavController().navigate(R.id.to_AddTourFragment)
+        } else {
+            showToast("You need to Login or Register to add a tour")
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+        }
+    }
+
+    private fun checkIfUserExist(){
+        if (firebaseAuth.currentUser != null){
+            FirestoreImplementations().getUserInfo()
+            findNavController().navigate(R.id.to_profileFragment)
+        } else {
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+
+            showToast("You need to Login or Register to see your profile")
+        }
     }
 
     /**

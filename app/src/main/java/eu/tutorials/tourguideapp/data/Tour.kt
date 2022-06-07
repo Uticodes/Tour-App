@@ -31,3 +31,26 @@ data class Tour(
             "placeImage" to placeImage
         )
 }
+
+@Parcelize
+data class UserTour(
+    var id: String = "",
+    var placeName: String = "",
+    var date: Date = Date(),
+    var description: String = "",
+    var authorsName: String = "",
+    var email: String = "",
+    var placeImage: String = "",
+) : Parcelable {
+
+    fun toMap() =
+        mapOf(
+            "id" to id,
+            "placeName" to placeName,
+            "date" to date,
+            "description" to description,
+            "authorsName" to authorsName,
+            "email" to email,
+            "placeImage" to placeImage
+        )
+}

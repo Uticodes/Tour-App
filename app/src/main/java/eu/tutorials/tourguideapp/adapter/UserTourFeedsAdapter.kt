@@ -9,33 +9,31 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import eu.tutorials.Constants
 import eu.tutorials.Constants.getDate
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.Tour
+import eu.tutorials.tourguideapp.data.UserTour
 import eu.tutorials.tourguideapp.databinding.TourItemViewBinding
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+
 
 /**
 * We have the @param [tourItems] to represent the list that populates the adapter
 **/
-class ToursAdapter(
+class UserTourFeedsAdapter(
     private val tourItems: ArrayList<Tour>,
     private val listener: (Tour) -> Unit
-) : RecyclerView.Adapter<ToursAdapter.ToursViewHolder>() {
+) : RecyclerView.Adapter<UserTourFeedsAdapter.UserToursFeedsViewHolder>() {
     /**
      * Inflates the item views which is designed in xml layout file
      *
      * create a new
      * {@link ViewHolder} and initializes some private fields to be used by RecyclerView.
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToursViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserToursFeedsViewHolder {
         val binding = TourItemViewBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
-        return ToursViewHolder(binding)
+        return UserToursFeedsViewHolder(binding)
     }
 
     /**
@@ -49,7 +47,7 @@ class ToursAdapter(
      * layout file.
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onBindViewHolder(holder: ToursViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: UserToursFeedsViewHolder, position: Int) {
         with(holder){
             with(tourItems[position]) {
                 val context = holder.itemView.context
@@ -94,6 +92,6 @@ class ToursAdapter(
     /**
      * A ViewHolder describes an item view and metadata about its place within the RecyclerView.
      */
-    inner class ToursViewHolder(val binding: TourItemViewBinding) :RecyclerView.ViewHolder(binding.root)
+    inner class UserToursFeedsViewHolder(val binding: TourItemViewBinding) :RecyclerView.ViewHolder(binding.root)
 
 }

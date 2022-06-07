@@ -1,19 +1,19 @@
 package eu.tutorials.tourguideapp.tour
 
+import android.os.Build
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.UnderlineSpan
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import eu.tutorials.Constants
+import eu.tutorials.Constants.getDate
 import eu.tutorials.Constants.showToast
-import eu.tutorials.Constants.spannableString
 import eu.tutorials.tourguideapp.FirestoreImplementations
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.Tour
@@ -27,7 +27,10 @@ class TourDetailsFragment : Fragment() {
     private val TAG = TourDetailsFragment::class.java.simpleName
     private var tour: Tour? = null
     private var _binding: FragmentTourDetailsBinding? = null
-    //private var documentId: String = ""
+    // Declare FirebaseAuth instance
+    private var firebaseAuth = FirebaseAuth.getInstance()
+    //Get current user
+    val user = firebaseAuth.currentUser
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
@@ -42,18 +45,18 @@ class TourDetailsFragment : Fragment() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         tour = arguments?.getParcelable(Constants.TOUR_KEY)
-        //documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
 
         binding.apply {
 
             Log.d(TAG, "Argument =>:|: DocumentId ${tour?.id} ${tour?.placeName} || ${tour?.description}")
 
             placeNameTextView.text = tour?.placeName
-            dateTextView.text = tour?.date.toString()
+            dateTextView.text = getDate(tour?.date.toString())
             descriptionTextView.text = tour?.description
             authorsNameTextView.text = getString(R.string.author, tour?.authorsName)
             Glide.with(requireContext())
@@ -61,10 +64,14 @@ class TourDetailsFragment : Fragment() {
                 .placeholder(R.drawable.babs_dock)
                 .into(placeImageView)
 
+            if (tour?.email != user?.email){
+                editBtn.visibility = View.GONE
+                deleteBtn.visibility = View.GONE
+            }
+
             editBtn.setOnClickListener {
                 val args = Bundle()
                 args.putParcelable(Constants.TOUR_KEY, tour)
-                //args.putString(Constants.DOCUMENT_ID_KEY, documentId)
                 findNavController().navigate(R.id.to_AddTourFragment, args)
             }
             deleteBtn.setOnClickListener {

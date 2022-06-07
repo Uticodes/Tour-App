@@ -19,7 +19,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import eu.tutorials.Constants
 import eu.tutorials.Constants.EXTERNAL_STORAGE_REQUEST_CODE
@@ -30,7 +30,6 @@ import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.Tour
 import eu.tutorials.tourguideapp.databinding.FragmentAddTourBinding
 import eu.tutorials.tourguideapp.utils.Resource
-import eu.tutorials.tourguideapp.utils.SharedPrefUtils
 import java.io.IOException
 import java.util.*
 import kotlin.properties.Delegates
@@ -40,6 +39,9 @@ import kotlin.properties.Delegates
 class AddTourFragment : Fragment() {
     private val TAG = "AddTourFragment"
 
+    // Declare FirebaseAuth instance
+    private var firebaseAuth = FirebaseAuth.getInstance()
+
     private var _binding: FragmentAddTourBinding? = null
     private var tour: Tour? = null
     private var tourId: String = ""
@@ -48,7 +50,7 @@ class AddTourFragment : Fragment() {
     private var placeImageView: ImageView? = null
     private var placeDescription: String = ""
     private var documentId: String? = ""
-    val appUser = Constants.sessionUser
+    val appUser = Constants.savedUser
     private var isUploadNewImageForEdit by Delegates.notNull<Boolean>()
 
     private val binding get() = _binding!!
@@ -81,6 +83,7 @@ class AddTourFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         tour = arguments?.getParcelable(Constants.TOUR_KEY)
         documentId = arguments?.getString(Constants.DOCUMENT_ID_KEY).toString()
+        Log.d("AddTourFragment", "AppUser details $appUser:::: ${firebaseAuth.currentUser?.uid}:::: ${firebaseAuth.currentUser?.displayName}:::: ${firebaseAuth.currentUser?.email}")
 
         isUploadNewImageForEdit = false
 
@@ -95,6 +98,7 @@ class AddTourFragment : Fragment() {
                 tourId = tour?.id.toString()
                 uploadBtn.text = getString(R.string.upload_edit)
                 previewImageView.visibility = View.VISIBLE
+                chooseImageBtn.isEnabled = false
                 Glide.with(requireContext())
                     .load(tour?.placeImage)
                     .placeholder(R.drawable.babs_dock)
@@ -270,15 +274,15 @@ class AddTourFragment : Fragment() {
         placeName = binding.placeName.text.toString().trim()
         placeImageView = binding.previewImageView
         placeDescription = binding.placeDescription.text.toString().trim()
-        val uniqueId = UUID.randomUUID().toString()
+        val user = firebaseAuth.currentUser //UUID.randomUUID().toString()
 
         val tour = Tour(
-            id = uniqueId,
+            id = user?.uid ?: "",
             placeName = placeName,
             date = Date(),
             description = placeDescription,
-            authorsName = appUser?.name ?: "",
-            email = appUser?.email ?: "",
+            authorsName = user?.displayName ?: "",
+            email = user?.email ?: "",
             //placeImage = selectedImageFileUri.toString()
         )
 
@@ -326,8 +330,8 @@ private fun editTour(tour: Tour?) {
                     placeName = placeName,
                     description = placeDescription
                 ),
-                isUploadNewImageForEdit,
-                selectedImageFileUri  ?: "".toUri(),
+//                isUploadNewImageForEdit,
+//                selectedImageFileUri  ?: "".toUri(),
                 result = { result ->
                     when (result) {
                         is Resource.Loading -> showProgressBar()

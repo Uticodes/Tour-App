@@ -15,6 +15,7 @@ import com.google.firebase.storage.ktx.storage
 import eu.tutorials.Constants
 import eu.tutorials.Constants.showToast
 import eu.tutorials.tourguideapp.FirestoreImplementations
+import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.databinding.ActivityLoginBinding
 import eu.tutorials.tourguideapp.tour.ToursActivity
 import eu.tutorials.tourguideapp.utils.Resource
@@ -24,8 +25,8 @@ import eu.tutorials.tourguideapp.utils.SharedPrefUtils
 class LoginActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private var binding: ActivityLoginBinding? = null
-    private var mAuth: FirebaseAuth? = null
     private val TAG = LoginActivity::class.java.simpleName
+
     // Declare FirebaseFirestore instance
     private var fbFirestore = FirebaseFirestore.getInstance()
 
@@ -35,24 +36,13 @@ class LoginActivity : AppCompatActivity() {
     // Declare Firebase storage
     private val storage = Firebase.storage
 
-    // Create a storage reference from our app
-    private val storageRef = storage.reference
-
-    // Declare User collection reference
-    private val userRef = fbFirestore.collection(Constants.COLLECTION_USERS)
-
-    // Declare Tour collection reference
-    private val tourRef = fbFirestore.collection(Constants.COLLECTION_TOURS)
-
     // Get Firebase current user
     var user = firebaseAuth.currentUser
 
-//    val t = userEmail.isNotEmpty() && userPassword.isNotEmpty()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
-        mAuth = FirebaseAuth.getInstance()
 
         setContentView(binding?.root)
         toolbar = binding!!.loginToolbar
@@ -79,32 +69,46 @@ class LoginActivity : AppCompatActivity() {
                 registerUser()
             }
 
+            //Hide Signup views and show login views
+            loginInstruction.setOnClickListener {
+                loginHideGroup.visibility = View.GONE
+                signUpHideGroup.visibility = View.VISIBLE
+            }
+            //Hide Login views and show Signup views
+            signUpInstruction.setOnClickListener {
+                loginHideGroup.visibility = View.VISIBLE
+                signUpHideGroup.visibility = View.GONE
+                binding!!.loginToolbar.title = getString(R.string.author)
+            }
+
             emailEt.apply {
-                setOnEditorActionListener {_, actionId, keyEvent ->
+                setOnEditorActionListener { _, actionId, keyEvent ->
                     if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
                         keyEvent == null ||
-                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
+                    ) {
                         userEmail = text.toString()
                     }
                     false
                 }
 
-                setOnFocusChangeListener {view, gainedFoucs ->
+                setOnFocusChangeListener { view, gainedFoucs ->
                     userEmail = text.toString()
                 }
             }
 
             passwordEt.apply {
-                setOnEditorActionListener {_, actionId, keyEvent ->
+                setOnEditorActionListener { _, actionId, keyEvent ->
                     if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
                         keyEvent == null ||
-                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
+                    ) {
                         userPassword = text.toString()
                     }
                     false
                 }
 
-                setOnFocusChangeListener {view, gainedFoucs ->
+                setOnFocusChangeListener { view, gainedFoucs ->
                     userPassword = text.toString()
                 }
             }
@@ -112,6 +116,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
     }
+
     private fun hideProgressBar() {
         binding?.apply {
             loginProgressBar.visibility = View.INVISIBLE
@@ -130,11 +135,10 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mAuth?.currentUser?.let {
+        firebaseAuth.currentUser?.let {
             FirestoreImplementations().getUserInfo()
-            Intent(this@LoginActivity, ToursActivity::class.java).apply {
-                startActivity(this)
-            }
+            startActivity(Intent(this@LoginActivity, ToursActivity::class.java))
+            finish()
         }
     }
 
@@ -143,18 +147,14 @@ class LoginActivity : AppCompatActivity() {
         val userPassword = binding?.passwordEt?.text.toString().trim()
         //Check if email and password is empty
         if (userEmail.isEmpty() || userPassword.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Please make sure to fill in your email and password",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            showToast("Please make sure to fill in your email and password")
         } else {
 
             FirestoreImplementations().signInUser(
+                this,
                 userEmail, userPassword,
-                result = { result->
-                    when(result){
+                result = { result ->
+                    when (result) {
                         is Resource.Loading -> showProgressBar()
                         is Resource.Success -> {
                             hideProgressBar()
@@ -178,20 +178,15 @@ class LoginActivity : AppCompatActivity() {
         val userName = binding?.nameEt?.text.toString().trim()
 
         if (userEmail.isEmpty() || userPassword.isEmpty() || userName.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Please make sure to fill in your email and password",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            showToast("Please make sure to fill in your email and password")
         } else {
 
             FirestoreImplementations().registerUser(
                 userName,
                 userEmail,
                 userPassword,
-                result = { result->
-                    when(result){
+                result = { result ->
+                    when (result) {
                         is Resource.Loading -> showProgressBar()
                         is Resource.Success -> {
                             hideProgressBar()
@@ -208,7 +203,6 @@ class LoginActivity : AppCompatActivity() {
             )
         }
     }
-
 
 
 }

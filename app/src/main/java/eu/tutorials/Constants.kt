@@ -2,25 +2,19 @@ package eu.tutorials
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.provider.MediaStore
+import android.os.Build
 import android.text.SpannableString
 import android.text.style.UnderlineSpan
-import android.util.Base64
 import android.util.Log
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import eu.tutorials.tourguideapp.R
 import eu.tutorials.tourguideapp.data.User
-import java.io.ByteArrayOutputStream
-import java.lang.String.format
-import java.text.DateFormat
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object Constants {
     private const val TAG = "Constants"
@@ -29,7 +23,7 @@ object Constants {
 
     private lateinit var observer: Observer<User>
 
-    var sessionUser: User? = null
+    var savedUser: User? = null
         private set
 
     //Collections
@@ -39,6 +33,7 @@ object Constants {
 
     //Intent
     const val TOUR_KEY = "${PACKAGE_NAME}.TOUR_KEY"
+    const val USER_TOUR_FEEDS_KEY = "${PACKAGE_NAME}.USER_TOUR_FEEDS_KEY"
     const val PREF_KEY = "${PACKAGE_NAME}.PREF_KEY"
     const val IMAGE_URL_KEY = "image_download_url"
     const val DOCUMENT_ID_KEY = "document_id"
@@ -46,11 +41,6 @@ object Constants {
     //Request codes
     const val EXTERNAL_STORAGE_REQUEST_CODE = 100
     const val URI_REQUEST_CODE = 101
-
-
-    fun Fragment.toBitmap(imageUri: String){
-        val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, Uri.parse(imageUri))
-    }
 
     fun Fragment.spannableString(context: Context, textView: TextView){
         val mSpannableString = SpannableString(context.getString(R.string.view_on_google_maps))
@@ -83,15 +73,17 @@ object Constants {
     }
 
     fun initSession(user: User) {
-        sessionUser = user
-
-        Log.d(TAG, "init Session user $sessionUser")
+        savedUser = user
+        Log.d(TAG, "Init save Session user $savedUser")
     }
 
-//    fun getDate(timestamp: Long) :String {
-//        val calendar = Calendar.getInstance(Locale.ENGLISH)
-//        calendar.timeInMillis = timestamp * 1000L
-//        val date = DateFormat.format("dd-MM-yyyy",calendar).toString()
-//        return date
-//    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getDate(timestamp: String) :String {
+
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy  HH:mm:ss")
+        val formatted = current.format(formatter)
+
+        return formatted.format(timestamp)
+    }
 }

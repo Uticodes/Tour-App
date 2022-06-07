@@ -21,16 +21,17 @@
             android:name=".tour.ToursActivity"
             android:exported="true"
             android:label="@string/title_activity_tour_details"
-            android:theme="@style/Theme.TourGuideApp.NoActionBar" />
-        <activity
-            android:name=".login.LoginActivity"
-            android:exported="true"
-            android:theme="@style/Theme.TourGuideApp.NoActionBar">
+            android:theme="@style/Theme.TourGuideApp.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TourGuideApp.NoActionBar">
         </activity>
 
 <!--  Todo : Add a fileProvider which the gallery needs to function and set the authorities

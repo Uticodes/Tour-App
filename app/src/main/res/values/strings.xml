@@ -48,5 +48,8 @@
     <string name="enter_place_description">Enter Place Description</string>
     <string name="enter_place_name">Enter Place Name</string>
     <string name="tour_feeds">Tour Feeds</string>
+    <string name="if_you_don_t_have_an_account_register">If you don\'t have an account, Register</string>
+    <string name="if_you_already_have_an_account_login">If you already have an account, Login</string>
+    <string name="you_have_not_added_any_tour_yet">You have not added any tour yet</string>
 
 </resources>
