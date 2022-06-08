@@ -291,8 +291,6 @@ class AddTourFragment : Fragment() {
         } else {
             showToast("Kindly check that all information are provided and try again")
         }
-
-
     }
 
     private fun editTour(tour: Tour?) {

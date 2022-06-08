@@ -2,9 +2,7 @@ package eu.tutorials.tourguideapp.ui.profile
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -13,18 +11,18 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import eu.tutorials.tourguideapp.R
+import eu.tutorials.tourguideapp.adapter.UserTourFeedsAdapter
+import eu.tutorials.tourguideapp.databinding.FragmentProfileBinding
+import eu.tutorials.tourguideapp.models.Tour
+import eu.tutorials.tourguideapp.models.User
 import eu.tutorials.tourguideapp.utils.Constants
 import eu.tutorials.tourguideapp.utils.Constants.logOut
 import eu.tutorials.tourguideapp.utils.Constants.logoutAlertDialog
 import eu.tutorials.tourguideapp.utils.Constants.showToast
-import eu.tutorials.tourguideapp.R
-import eu.tutorials.tourguideapp.adapter.ToursAdapter
-import eu.tutorials.tourguideapp.viewModel.ToursViewModel
-import eu.tutorials.tourguideapp.adapter.UserTourFeedsAdapter
-import eu.tutorials.tourguideapp.models.Tour
-import eu.tutorials.tourguideapp.models.User
-import eu.tutorials.tourguideapp.databinding.FragmentProfileBinding
 import eu.tutorials.tourguideapp.utils.Resource
+import eu.tutorials.tourguideapp.viewModel.ToursViewModel
+
 
 /**
  * A simple [Fragment] subclass.
@@ -61,6 +59,29 @@ class ProfileFragment : Fragment() {
         return binding.root
     }
 
+    //enable options menu in this fragment
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
+        super.onCreate(savedInstanceState)
+    }
+
+    //inflate the menu
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.logout_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    //handle item clicks of menu
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //get item id to handle item clicks
+        val id = item.itemId
+        //handle item clicks
+        if (id == R.id.action_logout) {
+            logOut()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val user = user
@@ -69,25 +90,22 @@ class ProfileFragment : Fragment() {
 
         binding.emailEt.setText(currentUser?.email)
         binding.nameEt.setText(currentUser?.displayName)
-        logOut()
         showProgressBar()
     }
 
     private fun logOut() {
-        binding.logoutLayout.setOnClickListener {
-            logoutAlertDialog {
-                viewModel.logOut().observe(viewLifecycleOwner) { result ->
-                    when (result) {
-                        is Resource.Loading -> showProgressBar()
-                        is Resource.Success -> {
-                            hideProgressBar()
-                            showToast(result.message)
-                            findNavController().logOut()
-                        }
-                        is Resource.Failure -> {
-                            hideProgressBar()
-                            showToast(result.message)
-                        }
+        logoutAlertDialog {
+            viewModel.logOut().observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        showToast(result.message)
+                        findNavController().logOut()
+                    }
+                    is Resource.Failure -> {
+                        hideProgressBar()
+                        showToast(result.message)
                     }
                 }
             }
@@ -115,7 +133,7 @@ class ProfileFragment : Fragment() {
 
     private fun initializedAdapter(toursList: ArrayList<Tour>) {
         // Adapter class is initialized and list is passed in the param.
-        val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
+        val tourAdapter = UserTourFeedsAdapter(toursList) { tour -> itemOnClick(tour) }
         val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
         binding.apply {
             // adapter instance is set to the recyclerview to inflate the items.

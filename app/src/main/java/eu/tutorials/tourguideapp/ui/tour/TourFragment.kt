@@ -14,16 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import eu.tutorials.tourguideapp.R
+import eu.tutorials.tourguideapp.adapter.ToursAdapter
+import eu.tutorials.tourguideapp.databinding.FragmentToursBinding
+import eu.tutorials.tourguideapp.models.Tour
+import eu.tutorials.tourguideapp.ui.login.LoginActivity
 import eu.tutorials.tourguideapp.utils.Constants.TOUR_KEY
 import eu.tutorials.tourguideapp.utils.Constants.showToast
-import eu.tutorials.tourguideapp.R
-import eu.tutorials.tourguideapp.viewModel.ToursViewModel
-import eu.tutorials.tourguideapp.adapter.ToursAdapter
-import eu.tutorials.tourguideapp.models.Tour
-import eu.tutorials.tourguideapp.databinding.FragmentToursBinding
-import eu.tutorials.tourguideapp.ui.login.LoginActivity
 import eu.tutorials.tourguideapp.utils.Resource
-import kotlinx.coroutines.coroutineScope
+import eu.tutorials.tourguideapp.viewModel.ToursViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -99,17 +98,20 @@ class TourFragment : Fragment() {
      * Function is used to show the list of inserted data.
      */
     private fun fetchAllTours() {
-        viewModel.getTours().observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is Resource.Loading -> showProgressBar()
-                is Resource.Success -> {
-                    hideProgressBar()
-                    initializedAdapter(result.data as ArrayList<Tour>)
-                }
-                is Resource.Failure -> {
-                    hideProgressBar()
-                    binding.emptyTextView.visibility = View.VISIBLE
-                    showToast(result.message)
+        lifecycleScope.launch {
+            delay(500)
+            viewModel.getTours().observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        initializedAdapter(result.data as ArrayList<Tour>)
+                    }
+                    is Resource.Failure -> {
+                        hideProgressBar()
+                        binding.emptyTextView.visibility = View.VISIBLE
+                        showToast(result.message)
+                    }
                 }
             }
         }
@@ -119,6 +121,7 @@ class TourFragment : Fragment() {
         // Adapter class is initialized and list is passed in the param.
         val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
         val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
+        if (toursList.isNotEmpty()) {
         binding.apply {
             // adapter instance is set to the recyclerview to inflate the items.
             toursRecyclerView.adapter = tourAdapter
@@ -126,8 +129,16 @@ class TourFragment : Fragment() {
             toursRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
             // Set the addItemDecoration that this RecyclerView will use.
             toursRecyclerView.addItemDecoration(dividerItemDecoration)
+            //Reverses the position of the items
+            toursList.reverse()
             toursRecyclerView.visibility = View.VISIBLE
             emptyTextView.visibility = View.INVISIBLE
+        }
+        } else {
+            binding.apply {
+                toursRecyclerView.visibility = View.INVISIBLE
+                emptyTextView.visibility = View.VISIBLE
+            }
         }
 
     }

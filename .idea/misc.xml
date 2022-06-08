@@ -19,9 +19,10 @@
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/fragment_tour_details.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/fragment_tours.xml" value="0.3098958333333333" />
-        <entry key="app/src/main/res/layout/logout_view.xml" value="0.4036458333333333" />
+        <entry key="app/src/main/res/layout/logout_view.xml" value="0.25" />
         <entry key="app/src/main/res/layout/progress_bar_view.xml" value="0.1" />
         <entry key="app/src/main/res/layout/tour_item_view.xml" value="0.30885416666666665" />
+        <entry key="app/src/main/res/menu/logout_menu.xml" value="0.30885416666666665" />
       </map>
     </option>
   </component>
