@@ -1,27 +1,31 @@
-package eu.tutorials.tourguideapp.tour
+package eu.tutorials.tourguideapp.ui.tour
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import eu.tutorials.Constants.COLLECTION_TOURS
-import eu.tutorials.Constants.TOUR_KEY
-import eu.tutorials.Constants.showToast
-import eu.tutorials.tourguideapp.FirestoreImplementations
+import eu.tutorials.tourguideapp.utils.Constants.TOUR_KEY
+import eu.tutorials.tourguideapp.utils.Constants.showToast
 import eu.tutorials.tourguideapp.R
+import eu.tutorials.tourguideapp.viewModel.ToursViewModel
 import eu.tutorials.tourguideapp.adapter.ToursAdapter
-import eu.tutorials.tourguideapp.data.Tour
+import eu.tutorials.tourguideapp.models.Tour
 import eu.tutorials.tourguideapp.databinding.FragmentToursBinding
-import eu.tutorials.tourguideapp.login.LoginActivity
+import eu.tutorials.tourguideapp.ui.login.LoginActivity
+import eu.tutorials.tourguideapp.utils.Resource
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 /**
@@ -30,13 +34,18 @@ import eu.tutorials.tourguideapp.login.LoginActivity
 class TourFragment : Fragment() {
     private val TAG = "TourFragment"
     private var _binding: FragmentToursBinding? = null
+
     // Declare FirebaseAuth instance
     private var firebaseAuth = FirebaseAuth.getInstance()
+
     // Declare Firestore instance
     var db = FirebaseFirestore.getInstance()
-    private val tourRef = db.collection(COLLECTION_TOURS)
     val toursList: ArrayList<Tour> = ArrayList()
-    private var documentId: String? = ""
+
+    //Initialize viewModel
+    private val viewModel by lazy {
+        ViewModelProvider(requireActivity())[ToursViewModel::class.java]
+    }
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -66,12 +75,11 @@ class TourFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        setupListOfDataIntoRecyclerView(toursList = toursList)
+        fetchAllTours(toursList = toursList)
     }
 
-    private fun checkIfUserIsLoggedIn(){
-        if (firebaseAuth.currentUser != null){
-            FirestoreImplementations().getUserInfo()
+    private fun checkIfUserIsLoggedIn() {
+        if (firebaseAuth.currentUser != null) {
             findNavController().navigate(R.id.to_AddTourFragment)
         } else {
             showToast("You need to Login or Register to add a tour")
@@ -79,13 +87,11 @@ class TourFragment : Fragment() {
         }
     }
 
-    private fun checkIfUserExist(){
-        if (firebaseAuth.currentUser != null){
-            FirestoreImplementations().getUserInfo()
+    private fun checkIfUserExist() {
+        if (firebaseAuth.currentUser != null) {
             findNavController().navigate(R.id.to_profileFragment)
         } else {
             startActivity(Intent(requireContext(), LoginActivity::class.java))
-
             showToast("You need to Login or Register to see your profile")
         }
     }
@@ -93,66 +99,48 @@ class TourFragment : Fragment() {
     /**
      * Function is used to show the list of inserted data.
      */
-    private fun setupListOfDataIntoRecyclerView(toursList: ArrayList<Tour>) {
-
+    private fun fetchAllTours(toursList: ArrayList<Tour>) {
         // Adapter class is initialized and list is passed in the param.
         val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
         val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
         tourAdapter.clearData()
-        db.collection(COLLECTION_TOURS)
-            .get()
-            .addOnSuccessListener { result ->
-                // Hide progressbar
-                hideProgressBar()
-                // Here we get the list of users in the form of documents.
-                Log.e("Tours List", result.documents.toString())
+        lifecycleScope.launch {
+            delay(500)
+            viewModel.getTours(toursList).observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        if (toursList.isNotEmpty()) {
+                            // Hide progressbar
+                            hideProgressBar()
+                            binding.apply {
+                                // adapter instance is set to the recyclerview to inflate the items.
+                                toursRecyclerView.adapter = tourAdapter
+                                // Set the LayoutManager that this RecyclerView will use.
+                                toursRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
+                                // Set the addItemDecoration that this RecyclerView will use.
+                                toursRecyclerView.addItemDecoration(dividerItemDecoration)
+                                toursRecyclerView.visibility = View.VISIBLE
+                                emptyTextView.visibility = View.INVISIBLE
+                            }
 
-                //if (toursList.isNotEmpty()) {
-                for (document in result.documents) {
-                    val tour = document.toObject(Tour::class.java)
-                    if (tour != null) {
-                        toursList.add(tour)
-                    }
+                        } else {
+                            binding.apply {
+                                toursRecyclerView.visibility = View.INVISIBLE
+                                emptyTextView.visibility = View.VISIBLE
+                            }
+                        }
 
-                    // TODO Step : Populate the toursList in the UI using RecyclerView.
-                    // START
-                    binding.apply {
-                        // adapter instance is set to the recyclerview to inflate the items.
-                        toursRecyclerView.adapter = tourAdapter
-                        // Set the LayoutManager that this RecyclerView will use.
-                        toursRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
-                        //toursRecyclerView.setHasFixedSize(true)
-                        // Set the addItemDecoration that this RecyclerView will use.
-                        toursRecyclerView.addItemDecoration(dividerItemDecoration)
-                        toursRecyclerView.visibility = View.VISIBLE
-                        emptyTextView.visibility = View.GONE
                     }
-                    documentId = document.id
-                    Log.d(TAG, "TourInfo:|:|:|:${document.id} => ${document.data}")
+                    is Resource.Failure -> {
+                        hideProgressBar()
+                        binding.emptyTextView.visibility = View.VISIBLE
+                        showToast(result.message)
+                    }
                 }
             }
-            .addOnFailureListener { exception ->
-                // Hide progressbar
-                hideProgressBar()
-
-                Log.w(TAG, "Error getting documents.", exception)
-            }
-
-        if (toursList.isNotEmpty()) {
-            // Hide progressbar
-            hideProgressBar()
-            binding.apply {
-                toursRecyclerView.visibility = View.VISIBLE
-                emptyTextView.visibility = View.GONE
-            }
-
-        } else {
-            binding.apply {
-                toursRecyclerView.visibility = View.GONE
-                emptyTextView.visibility = View.VISIBLE
-            }
         }
-
     }
 
     private fun hideProgressBar() {
@@ -173,7 +161,6 @@ class TourFragment : Fragment() {
     private fun itemOnClick(tour: Tour) {
         val args = Bundle()
         args.putParcelable(TOUR_KEY, tour)
-        //args.putString(DOCUMENT_ID_KEY, documentId)
         findNavController().navigate(R.id.to_TourDetailsFragment, args)
     }
 

@@ -1,4 +1,4 @@
-package eu.tutorials.tourguideapp.tour
+package eu.tutorials.tourguideapp.ui.tour
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

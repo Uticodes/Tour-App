@@ -26,13 +26,14 @@
     <string name="delete">Delete</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="cancel">Cancel</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="login">Log In</string>
     <string name="login_signup">Log In or Sign Up</string>
     <string name="login_instruction">Enter Email and Password to Log in\nEnter Name, Email and Password to Sign up</string>
-    <string name="signUp">SignUp</string>
+    <string name="signUp">Sign Up</string>
     <string name="email">Email</string>
     <string name="name">Name</string>
     <string name="password">Password</string>
@@ -51,5 +52,7 @@
     <string name="if_you_don_t_have_an_account_register">If you don\'t have an account, Register</string>
     <string name="if_you_already_have_an_account_login">If you already have an account, Login</string>
     <string name="you_have_not_added_any_tour_yet">You have not added any tour yet</string>
+    <string name="log_out">LogOut</string>
+    <string name="sure_you_want_to_log_out">Sure you want to log out?</string>
 
 </resources>

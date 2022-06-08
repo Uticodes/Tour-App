@@ -14,10 +14,16 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.TourGuideApp.NoActionBar">
+    <style name="Theme.TourGuideApp.NoActionBar" >
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="Theme.TourGuideApp.NoActionBar.ProfileFragment" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 
     <style name="Theme.TourGuideApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 

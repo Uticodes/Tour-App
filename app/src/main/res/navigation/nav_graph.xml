@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/ToursFragment"
-        android:name="eu.tutorials.tourguideapp.tour.TourFragment"
+        android:name="eu.tutorials.tourguideapp.ui.tour.TourFragment"
         android:label="@string/tours_fragment_label"
         tools:layout="@layout/fragment_tours">
 
@@ -23,7 +23,7 @@
     </fragment>
     <fragment
         android:id="@+id/TourDetailsFragment"
-        android:name="eu.tutorials.tourguideapp.tour.TourDetailsFragment"
+        android:name="eu.tutorials.tourguideapp.ui.tour.TourDetailsFragment"
         android:label="@string/tour_details_fragment"
         tools:layout="@layout/fragment_tour_details">
 
@@ -36,7 +36,7 @@
     </fragment>
     <fragment
         android:id="@+id/AddTourFragment"
-        android:name="eu.tutorials.tourguideapp.tour.AddTourFragment"
+        android:name="eu.tutorials.tourguideapp.ui.tour.AddTourFragment"
         android:label="@string/add_tour_fragment_label"
         tools:layout="@layout/fragment_add_tour" >
 
@@ -46,7 +46,7 @@
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="eu.tutorials.tourguideapp.profile.ProfileFragment"
+        android:name="eu.tutorials.tourguideapp.ui.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" >
         <action

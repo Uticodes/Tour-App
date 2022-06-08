@@ -1,27 +1,20 @@
 package eu.tutorials.tourguideapp.adapter
 
 import android.os.Build
-import android.text.SpannableString
-import android.text.style.UnderlineSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import eu.tutorials.Constants.getDate
+import eu.tutorials.tourguideapp.utils.Constants.getDate
 import eu.tutorials.tourguideapp.R
-import eu.tutorials.tourguideapp.data.Tour
+import eu.tutorials.tourguideapp.models.Tour
 import eu.tutorials.tourguideapp.databinding.TourItemViewBinding
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
-* We have the @param [tourItems] to represent the list that populates the adapter
-**/
+ * We have the @param [tourItems] to represent the list that populates the adapter
+ **/
 class ToursAdapter(
     private val tourItems: ArrayList<Tour>,
     private val listener: (Tour) -> Unit
@@ -50,15 +43,9 @@ class ToursAdapter(
      */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: ToursViewHolder, position: Int) {
-        with(holder){
+        with(holder) {
             with(tourItems[position]) {
                 val context = holder.itemView.context
-
-                val mSpannableString = SpannableString(context.getString(R.string.view_on_google_maps))
-
-                // Setting underline style from position 0 till length of
-                // the spannable string
-                mSpannableString.setSpan(UnderlineSpan(), 0, mSpannableString.length, 0)
 
                 binding.placeNameTextView.text = placeName
                 binding.dateTextView.text = getDate(date.toString())
@@ -94,6 +81,7 @@ class ToursAdapter(
     /**
      * A ViewHolder describes an item view and metadata about its place within the RecyclerView.
      */
-    inner class ToursViewHolder(val binding: TourItemViewBinding) :RecyclerView.ViewHolder(binding.root)
+    inner class ToursViewHolder(val binding: TourItemViewBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
 }

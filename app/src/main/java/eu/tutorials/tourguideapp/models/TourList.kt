@@ -1,6 +1,4 @@
-package eu.tutorials.tourguideapp.data
-
-import eu.tutorials.tourguideapp.R
+package eu.tutorials.tourguideapp.models
 
 /* Returns initial list of tours. */
 
