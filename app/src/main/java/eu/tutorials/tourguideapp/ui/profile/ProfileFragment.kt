@@ -18,6 +18,7 @@ import eu.tutorials.tourguideapp.utils.Constants.logOut
 import eu.tutorials.tourguideapp.utils.Constants.logoutAlertDialog
 import eu.tutorials.tourguideapp.utils.Constants.showToast
 import eu.tutorials.tourguideapp.R
+import eu.tutorials.tourguideapp.adapter.ToursAdapter
 import eu.tutorials.tourguideapp.viewModel.ToursViewModel
 import eu.tutorials.tourguideapp.adapter.UserTourFeedsAdapter
 import eu.tutorials.tourguideapp.models.Tour
@@ -93,38 +94,15 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun fetchUserTourFeeds(toursList: ArrayList<Tour>) {
-        // Adapter class is initialized and list is passed in the param.
-        val tourAdapter = UserTourFeedsAdapter(toursList) { tour -> itemOnClick(tour) }
-        val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
-        tourAdapter.clearData()
-        viewModel.getUserTourFeeds(toursList).observe(viewLifecycleOwner) { result ->
+    private fun fetchUserTourFeeds() {
+        viewModel.getUserTourFeeds().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Resource.Loading -> showProgressBar()
                 is Resource.Success -> {
                     hideProgressBar()
-                    if (toursList.isNotEmpty()) {
-                        // Hide progressbar
-                        hideProgressBar()
-                        binding.apply {
-                            // adapter instance is set to the recyclerview to inflate the items.
-                            toursFeedsRecyclerView.adapter = tourAdapter
-                            // Set the LayoutManager that this RecyclerView will use.
-                            toursFeedsRecyclerView.layoutManager =
-                                LinearLayoutManager(requireActivity())
-                            // Set the addItemDecoration that this RecyclerView will use.
-                            toursFeedsRecyclerView.addItemDecoration(dividerItemDecoration)
-                            toursFeedsRecyclerView.visibility = View.VISIBLE
-                            emptyTextView.visibility = View.INVISIBLE
-                        }
-
-                    } else {
-                        binding.apply {
-                            toursFeedsRecyclerView.visibility = View.INVISIBLE
-                            emptyTextView.visibility = View.VISIBLE
-                        }
-                    }
-
+                    // Hide progressbar
+                    hideProgressBar()
+                    initializedAdapter(result.data as ArrayList<Tour>)
                 }
                 is Resource.Failure -> {
                     hideProgressBar()
@@ -133,6 +111,23 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun initializedAdapter(toursList: ArrayList<Tour>) {
+        // Adapter class is initialized and list is passed in the param.
+        val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
+        val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
+        binding.apply {
+            // adapter instance is set to the recyclerview to inflate the items.
+            toursFeedsRecyclerView.adapter = tourAdapter
+            // Set the LayoutManager that this RecyclerView will use.
+            toursFeedsRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
+            // Set the addItemDecoration that this RecyclerView will use.
+            toursFeedsRecyclerView.addItemDecoration(dividerItemDecoration)
+            toursFeedsRecyclerView.visibility = View.VISIBLE
+            emptyTextView.visibility = View.INVISIBLE
+        }
+
     }
 
     /* Opens TourDetailsActivity when RecyclerView item is clicked. */
@@ -144,7 +139,7 @@ class ProfileFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        fetchUserTourFeeds(toursList = toursList)
+        fetchUserTourFeeds()
     }
 
     override fun onDestroyView() {

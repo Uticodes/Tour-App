@@ -34,8 +34,7 @@ class ToursViewModel(application: Application) : AndroidViewModel(application) {
     private val _requestStateLiveData = MutableLiveData<Resource<Unit>>()
     val requestStateLiveData: LiveData<Resource<Unit>> = _requestStateLiveData
 
-    private val _tours = MutableLiveData<ArrayList<Tour>>()
-    val tours: LiveData<ArrayList<Tour>> = _tours
+
 
     init {
         viewModelScope.launch {
@@ -81,20 +80,20 @@ class ToursViewModel(application: Application) : AndroidViewModel(application) {
         return genericLiveData
     }
 
-    suspend fun getTours(toursList: ArrayList<Tour>): LiveData<Resource<String>> {
-        val genericLiveData = MutableLiveData<Resource<String>>()
+     fun getTours(): LiveData<Resource<List<Tour>>> {
+        val genericLiveData = MutableLiveData<Resource<List<Tour>>>()
         genericLiveData.value = Resource.Loading()
         viewModelScope.launch(Dispatchers.IO) {
-            genericLiveData.postValue(firebaseRepository.getTours(toursList))
+            genericLiveData.postValue(firebaseRepository.getTours())
         }
         return genericLiveData
     }
 
-    fun getUserTourFeeds(toursList: ArrayList<Tour>): LiveData<Resource<String>> {
-        val genericLiveData = MutableLiveData<Resource<String>>()
+    fun getUserTourFeeds(): LiveData<Resource<List<Tour>>> {
+        val genericLiveData = MutableLiveData<Resource<List<Tour>>>()
         genericLiveData.value = Resource.Loading()
         viewModelScope.launch(Dispatchers.IO) {
-            genericLiveData.postValue(firebaseRepository.getUserTourFeeds(toursList))
+            genericLiveData.postValue(firebaseRepository.getUserTourFeeds())
         }
         return genericLiveData
     }

@@ -40,7 +40,6 @@ class TourFragment : Fragment() {
 
     // Declare Firestore instance
     var db = FirebaseFirestore.getInstance()
-    val toursList: ArrayList<Tour> = ArrayList()
 
     //Initialize viewModel
     private val viewModel by lazy {
@@ -75,7 +74,7 @@ class TourFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        fetchAllTours(toursList = toursList)
+        fetchAllTours()
     }
 
     private fun checkIfUserIsLoggedIn() {
@@ -99,48 +98,38 @@ class TourFragment : Fragment() {
     /**
      * Function is used to show the list of inserted data.
      */
-    private fun fetchAllTours(toursList: ArrayList<Tour>) {
-        // Adapter class is initialized and list is passed in the param.
-        val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
-        val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
-        tourAdapter.clearData()
-        lifecycleScope.launch {
-            delay(500)
-            viewModel.getTours(toursList).observe(viewLifecycleOwner) { result ->
-                when (result) {
-                    is Resource.Loading -> showProgressBar()
-                    is Resource.Success -> {
-                        hideProgressBar()
-                        if (toursList.isNotEmpty()) {
-                            // Hide progressbar
-                            hideProgressBar()
-                            binding.apply {
-                                // adapter instance is set to the recyclerview to inflate the items.
-                                toursRecyclerView.adapter = tourAdapter
-                                // Set the LayoutManager that this RecyclerView will use.
-                                toursRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
-                                // Set the addItemDecoration that this RecyclerView will use.
-                                toursRecyclerView.addItemDecoration(dividerItemDecoration)
-                                toursRecyclerView.visibility = View.VISIBLE
-                                emptyTextView.visibility = View.INVISIBLE
-                            }
-
-                        } else {
-                            binding.apply {
-                                toursRecyclerView.visibility = View.INVISIBLE
-                                emptyTextView.visibility = View.VISIBLE
-                            }
-                        }
-
-                    }
-                    is Resource.Failure -> {
-                        hideProgressBar()
-                        binding.emptyTextView.visibility = View.VISIBLE
-                        showToast(result.message)
-                    }
+    private fun fetchAllTours() {
+        viewModel.getTours().observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Resource.Loading -> showProgressBar()
+                is Resource.Success -> {
+                    hideProgressBar()
+                    initializedAdapter(result.data as ArrayList<Tour>)
+                }
+                is Resource.Failure -> {
+                    hideProgressBar()
+                    binding.emptyTextView.visibility = View.VISIBLE
+                    showToast(result.message)
                 }
             }
         }
+    }
+
+    private fun initializedAdapter(toursList: ArrayList<Tour>) {
+        // Adapter class is initialized and list is passed in the param.
+        val tourAdapter = ToursAdapter(toursList) { tour -> itemOnClick(tour) }
+        val dividerItemDecoration = DividerItemDecoration(requireActivity(), RecyclerView.VERTICAL)
+        binding.apply {
+            // adapter instance is set to the recyclerview to inflate the items.
+            toursRecyclerView.adapter = tourAdapter
+            // Set the LayoutManager that this RecyclerView will use.
+            toursRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
+            // Set the addItemDecoration that this RecyclerView will use.
+            toursRecyclerView.addItemDecoration(dividerItemDecoration)
+            toursRecyclerView.visibility = View.VISIBLE
+            emptyTextView.visibility = View.INVISIBLE
+        }
+
     }
 
     private fun hideProgressBar() {

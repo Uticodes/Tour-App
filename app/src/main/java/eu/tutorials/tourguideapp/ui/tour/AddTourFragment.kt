@@ -237,7 +237,7 @@ class AddTourFragment : Fragment() {
                         // END
                     } catch (e: IOException) {
                         e.printStackTrace()
-                        showToast("Image selection Failed!")
+                        showToast("Image selection Failed! ${e.message}")
                     }
                 }
             } else {

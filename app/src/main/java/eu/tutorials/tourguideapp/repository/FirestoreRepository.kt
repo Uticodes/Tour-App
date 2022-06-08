@@ -299,8 +299,9 @@ class FirestoreRepository {
             }
     }
 
-    suspend fun getTours(toursList: ArrayList<Tour>): Resource<String> {
+    suspend fun getTours(): Resource<List<Tour>> {
         return try {
+            val toursList =  ArrayList<Tour>()
             val response = fbFirestore.collection(COLLECTION_TOURS).get().await()
             // Here we get the list of users in the form of documents.
             for (document in response.documents) {
@@ -314,7 +315,7 @@ class FirestoreRepository {
                 )
             }
             Log.d("Get All Tours", response.documents.toString())
-            Resource.Success(message = "Tours gotten successfully")
+            Resource.Success(data = toursList, message = "Tours gotten successfully")
         } catch (error: Exception) {
             Log.w("TourFragment", "Error getting all tours. ${error.message}")
             Resource.Failure(error.message.toString())
@@ -322,11 +323,13 @@ class FirestoreRepository {
     }
 
 
-    suspend fun getUserTourFeeds(toursList: ArrayList<Tour>): Resource<String> {
+    suspend fun getUserTourFeeds(): Resource<List<Tour>> {
         return try {
-            val response =
-                fbFirestore.collection(COLLECTION_TOURS).whereEqualTo("email", user?.email)
-                    .get().await()
+            val toursList =  ArrayList<Tour>()
+            val response = fbFirestore.collection(COLLECTION_TOURS)
+                .whereEqualTo("email", user?.email)
+                .get()
+                .await()
             // Here we get the list of users in the form of documents.
             for (document in response.documents) {
                 val tour = document.toObject(Tour::class.java)
@@ -339,7 +342,7 @@ class FirestoreRepository {
                 )
             }
             Log.d("User Tour feeds", response.documents.toString())
-            Resource.Success(message = "All Tours gotten successfully")
+            Resource.Success(data = toursList, message = "All Tours gotten successfully")
         } catch (error: Exception) {
             Log.w("ProfileFragment", "Error getting User Tours. ${error.message}")
             Resource.Failure(error.message.toString())
