@@ -30,12 +30,6 @@ class ToursViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseRepository = FirestoreRepository()
     private val genericLiveData = MutableLiveData<Resource<String>>()
 
-    private val fsImpl: FirestoreRepository = FirestoreRepository()
-    private val _requestStateLiveData = MutableLiveData<Resource<Unit>>()
-    val requestStateLiveData: LiveData<Resource<Unit>> = _requestStateLiveData
-
-
-
     init {
         viewModelScope.launch {
 
